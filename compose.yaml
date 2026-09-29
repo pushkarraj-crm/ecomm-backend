@@ -1,0 +1,116 @@
+x-backend-common: &backend-common
+  build: .
+  env_file:
+    - .env
+  environment: &backend-environment
+    DEBUG: "False"
+    DB_ENGINE: django.db.backends.postgresql
+    DB_NAME: ${POSTGRES_DB:-marketplace}
+    DB_USER: ${POSTGRES_USER:-marketplace}
+    DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    DB_HOST: database
+    DB_PORT: "5432"
+    DB_CONN_MAX_AGE: ${DB_CONN_MAX_AGE:-60}
+    REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379/1
+    TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
+    API_USER_RATE: ${API_USER_RATE:-1200/hour}
+    API_ANON_RATE: ${API_ANON_RATE:-120/minute}
+    API_REGISTER_RATE: ${API_REGISTER_RATE:-5/hour}
+    API_LOGIN_RATE: ${API_LOGIN_RATE:-10/minute}
+    API_PASSWORD_RESET_RATE: ${API_PASSWORD_RESET_RATE:-5/hour}
+    GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
+    GUNICORN_THREADS: ${GUNICORN_THREADS:-2}
+  volumes:
+    - static_files:/app/staticfiles
+    - uploaded_media:/app/media
+  restart: unless-stopped
+
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-marketplace}
+      POSTGRES_USER: ${POSTGRES_USER:-marketplace}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["sh", "-c", "exec redis-server --requirepass \"$${REDIS_PASSWORD}\""]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping 2>/dev/null | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  migrate:
+    <<: *backend-common
+    command: ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput"]
+    restart: "no"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  api1:
+    <<: *backend-common
+    command: ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "${GUNICORN_WORKERS:-3}", "--threads", "${GUNICORN_THREADS:-2}", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-"]
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  api2:
+    <<: *backend-common
+    command: ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "${GUNICORN_WORKERS:-3}", "--threads", "${GUNICORN_THREADS:-2}", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-"]
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  loadbalancer:
+    image: nginx:1.27-alpine
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_files:/srv/static:ro
+      - uploaded_media:/srv/media:ro
+    depends_on:
+      api1:
+        condition: service_healthy
+      api2:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  static_files:
+  uploaded_media:

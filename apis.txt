@@ -1,0 +1,315 @@
+Marketplace Backend API
+=======================
+
+Authentication
+--------------
+POST   /api/auth/register/
+       Register a customer. JSON requires email and password. Optional profile
+       fields are name and mobile_number; provide both together. An optional
+       addresses list can be included when a delivery address is available.
+
+POST   /api/auth/seller/register/
+       Register a seller. JSON: {"email": "...", "password": "...",
+       "business_name": "..."}. business_name is optional.
+
+POST   /api/auth/customer/login/
+       Sign in a customer. JSON: {"email": "...", "password": "..."}.
+       Seller accounts are rejected by this endpoint.
+
+POST   /api/auth/seller/login/
+       Sign in a seller. JSON: {"email": "...", "password": "..."}.
+       Customer accounts are rejected by this endpoint.
+
+POST   /api/auth/login/
+       JSON: {"email": "...", "password": "..."}
+       Legacy role-agnostic login. Returns access and refresh tokens,
+       is_seller, and seller_status.
+
+POST   /api/auth/forgot-password/
+       Request password reset instructions. JSON: {"email": "..."}
+       The response is the same whether or not that email has an account.
+       In DEBUG mode, the reset instructions are written to the server console;
+       configure EMAIL_* environment variables to send real email.
+
+POST   /api/auth/reset-password/
+       Set a new password using the emailed token.
+       JSON: {"uid": "...", "token": "...", "new_password": "..."}
+       The password must satisfy Django's configured password validators.
+
+POST   /api/auth/logout/
+       Requires the current access token. JSON: {"refresh": "..."}
+       Blacklists that user's refresh token. The current access token remains
+       valid until it expires.
+
+Use the access token for protected endpoints:
+Authorization: Bearer <access_token>
+
+Rate limits apply to anonymous and authenticated API requests. Login,
+registration, and password reset have tighter configurable limits. Exceeded
+limits return HTTP 429; configure the API_*_RATE values in the private .env.
+
+Products
+--------
+GET    /api/products/
+       List active, approved products. Public. Existing clients may omit query
+       parameters and receive the original array response. Add page=1 and an
+       optional page_size (maximum 100) for paginated {count, next, previous,
+       results} responses. Search and sort return the same paginated response
+       automatically (24 results by default; page_size can change this up to 100).
+
+       Search from the customer app's search bar:
+       GET /api/products/?search=blue%20shirt
+       The search is case-insensitive and matches every word across product
+       name, description, category name, variant size, and variant color.
+       The shorter `q` parameter is also accepted as an alias:
+       GET /api/products/?q=blue
+       Search terms are limited to 100 characters.
+
+       Sort the catalog/search results with `sort`:
+       price_asc  - lowest in-stock variant price first
+       price_desc - highest starting price (minimum in-stock variant price) first
+       newest     - recently created products first (default)
+       oldest     - oldest products first
+       name_asc   - product name A to Z
+       name_desc  - product name Z to A
+       Example: GET /api/products/?search=blue&sort=price_asc&page=1&page_size=20
+       `sort_by` is also accepted as an alias for `sort`. Unsupported sort values
+       return HTTP 400. Catalog results are cached briefly per query.
+
+POST   /api/products/create/
+       Create a product with variants. Requires an approved seller token.
+       JSON: {"name": "...", "description": "...", "category": <id>,
+       "variants": [{"size": "...", "color": "...", "price": <number>,
+       "stock": <integer>}]}
+       Optional variant image uploads use the multipart field
+       variant_<variant-index>_images (for example, variant_0_images).
+
+GET    /api/products/categories/?search=men
+       Return the nested category tree used by the seller's category picker.
+       The optional case-insensitive search returns matching categories and
+       their parent categories. Search is limited to 100 characters.
+
+POST   /api/products/<product_id>/track/
+       Record a product view or click for seller analytics. Public, rate limited.
+       JSON: {"event": "view"} or {"event": "click"}. The customer app should
+       send one event when a product is viewed or opened; events are not inferred
+       from cached catalog responses.
+
+GET    /api/products/<product_id>/
+       Get one product by ID. Public.
+
+POST   /api/products/review/
+       Add a review. Requires a token.
+       JSON: {"product_id": <id>, "rating": <integer>, "comment": "..."}
+
+Customer
+--------
+POST   /api/customer/profile/
+       Create or replace the signed-in customer's profile. Requires a customer token.
+       JSON: {"name": "...", "mobile_number": "...", "addresses": [
+       {"label": "Home", "address_line_1": "...", "address_line_2": "...",
+       "landmark": "...", "city": "...", "state": "...",
+       "postal_code": "...", "country": "India", "is_default": true}]}
+       Include one or more addresses. The first address becomes the default when
+       none is marked as default. Structured address fields are recommended for
+       delivery integration; the legacy free-form address string remains accepted.
+
+GET    /api/customer/profile/
+       Get the profile and all saved addresses.
+
+PATCH  /api/customer/profile/
+       Update name and/or mobile_number. If addresses is supplied, it replaces
+       the saved address list and must contain at least one address.
+
+GET    /api/customer/addresses/
+       List saved addresses for the signed-in customer.
+
+POST   /api/customer/addresses/
+       Add an address. Send address_line_1, city, state, and postal_code, with
+       optional address_line_2, landmark, country, label, and is_default.
+       Legacy free-form {"address": "..."} is still accepted.
+
+PATCH  /api/customer/addresses/<address_id>/
+       Update one saved address. Accepts label, structured address fields,
+       legacy address, and/or is_default.
+
+DELETE /api/customer/addresses/<address_id>/
+       Delete one saved address. If it was the default, another saved address
+       becomes the default automatically.
+
+POST   /api/customer/cart/add/
+       Add a product variant to the signed-in customer's cart.
+       JSON: {"variant_id": <id>, "quantity": <positive integer>}
+       variant_id is required; quantity is optional and defaults to 1.
+       Adding an existing variant increases its cart quantity.
+
+GET    /api/orders/customer/history/
+       Get the signed-in customer's order history. Requires a customer token.
+       Returns up to 24 orders by default with total_orders, next, and previous;
+       use page and page_size (maximum 100) to browse older orders.
+
+Cart
+----
+All cart endpoints require a token.
+
+GET    /api/cart/
+       Get the signed-in user's cart.
+
+PATCH  /api/cart/update/<item_id>/
+       Set a cart item's quantity. JSON: {"quantity": <positive integer>}
+
+DELETE /api/cart/remove/<item_id>/
+       Remove one cart item.
+
+DELETE /api/cart/clear/
+       Remove all items from the signed-in user's cart.
+
+Orders
+------
+POST   /api/orders/checkout/
+       Start Razorpay checkout from the signed-in customer's cart.
+       JSON: {"name": "...", "phone": "...", "address_id": <saved address id>}
+       The selected saved address must include address_line_1, city, state, and
+       postal_code. A legacy {"address": "..."} string is still accepted for
+       older clients, but structured details are needed for carrier booking.
+       Response includes a local order_id and payment details for the client:
+       key_id, razorpay_order_id, amount (in paise), and currency. Use these
+       values to open Razorpay Checkout. The cart remains until payment is
+       verified. order_status is pending while payment is in progress.
+
+POST   /api/orders/payment/verify/
+       Verify the Razorpay Checkout callback. Requires the same customer's
+       access token. JSON:
+       {"order_id": <local order id>,
+       "razorpay_order_id": "order_...",
+       "razorpay_payment_id": "pay_...",
+       "razorpay_signature": "..."}
+       The server checks the signature and confirms the payment is captured
+       before setting the parent order status to paid and removing its
+       quantities from the cart. Purchased variant stock is decremented after
+       capture. Seller fulfillment status remains pending until the seller
+       updates it to shipped or delivered.
+
+POST   /api/orders/razorpay/webhook/
+       Public Razorpay webhook endpoint. Verify using the exact raw request body
+       and X-Razorpay-Signature. Configure RAZORPAY_WEBHOOK_SECRET and subscribe
+       to refund.created, refund.processed, and refund.failed in Razorpay.
+
+       Put RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in the private .env file.
+       Currency is INR. Keep the secret on the server; only key_id is returned
+       to the client. Enable automatic capture
+       in Razorpay, since orders are confirmed only after Razorpay reports the
+       payment as captured.
+
+GET    /api/orders/seller/dashboard/
+       Get seller order summary. Requires a seller token.
+
+PATCH  /api/orders/update-status/<seller_order_id>/
+       Update a seller order status. JSON status must be pending, shipped,
+       or delivered. Requires the owning seller's token.
+
+Seller
+------
+GET    /api/seller/dashboard/
+       Seller dashboard with total/pending/shipped/delivered order counts,
+       stock summary, earnings summary, and the 10 most recent order cards.
+       Use /api/seller/orders/ to browse all orders.
+
+GET    /api/seller/orders/
+       List the signed-in seller's paid orders with customer name, phone, email,
+       shipping address, order items, payment/order status, and refund history.
+       Optional status=pending|shipped|delivered filters by seller fulfillment
+       status. Responses are paginated (24 by default); use page and page_size
+       (maximum 100). `status` is the seller fulfillment status; `order_status`
+       is the parent financial status (paid, partially_refunded, or refunded).
+
+GET    /api/seller/analytics/?period=last_7_days
+       Business dashboard metrics and daily chart series for views, clicks,
+       orders, and sales. period may be yesterday, last_7_days, last_30_days,
+       or custom. Custom requires start_date=YYYY-MM-DD and end_date=YYYY-MM-DD
+       (inclusive, maximum 366 days). Conversion rate is orders divided by
+       tracked clicks. Return percentage is paid seller orders with at least one
+       processed refund divided by paid seller orders. Use the product tracking
+       endpoint above to populate views and clicks.
+
+GET    /api/seller/orders/<seller_order_id>/invoice/
+       Download a PDF invoice for this seller's part of the order. Requires the
+       owning seller's token. The invoice includes seller details, customer and
+       shipping information, items, quantities, and seller-order total.
+
+GET    /api/seller/orders/<seller_order_id>/refunds/
+       List refund requests for this seller order. Paginated (24 by default); use
+       page and page_size (maximum 100).
+
+POST   /api/seller/orders/<seller_order_id>/refunds/
+       Request a partial or full refund through Razorpay. Requires the owning
+       seller's token. JSON: {"amount": <positive INR amount>, "reason": "...",
+       "idempotency_key": "unique-request-key"}. A refund cannot exceed the
+       remaining amount for this seller order or payment. Pending refunds reserve
+       balance. Configure the Razorpay webhook above to receive final statuses.
+
+GET    /api/seller/inventory/summary/
+       Count this seller's variants that are out of stock (stock <= 0), low
+       stock (1 through LOW_STOCK_THRESHOLD), and in stock. The default low
+       stock threshold is 5 and can be configured in .env.
+
+GET    /api/seller/inventory/?status=out_of_stock|low_stock|in_stock
+       List this seller's variants, optionally filtered by stock status. Paginated.
+       Stock is checked at checkout and decremented after payment is captured.
+
+PATCH  /api/seller/inventory/<variant_id>/
+       Set stock for one of the signed-in seller's variants. JSON:
+       {"stock": <non-negative integer>}.
+
+GET    /api/seller/earnings/
+       Seller earnings dashboard. Requires a seller token. Returns INR totals
+       for gross/net paid sales, pending and completed payouts, pending,
+       processed, and failed refunds, available balance, paid-order count, and
+       the 10 most recent paid sales and payout requests. Pending and processed
+       refunds reduce the available balance. Earnings use seller-order totals;
+       marketplace commission and logistics charges are not currently modeled.
+
+POST   /api/seller/catalog/single/
+       Create one product with variants; same request format and image fields as
+       POST /api/products/create/. Requires an approved seller token.
+
+GET    /api/seller/catalog/bulk/template/
+       Download the .xlsx template for bulk catalog upload. Requires an approved
+       seller token.
+
+POST   /api/seller/catalog/bulk/
+       Upload an .xlsx workbook as multipart field `file`. Required columns:
+       product_key, product_name, description, category_id, size, color, price,
+       stock. Repeat product_key on rows to add variants to the same product;
+       use a category ID from GET /api/products/categories/; product details
+       must match across those rows. Maximum 10 MB, 1000 data
+       rows, and 100 products per upload. Products enter pending review. Requires
+       an approved seller token.
+
+GET    /api/seller/payout/
+       List the signed-in seller's payout requests and their pending, processed,
+       or failed statuses. Paginated (24 by default); use page and page_size
+       (maximum 100).
+
+POST   /api/seller/payout/
+       Request a payout. Requires KYC verification and saved bank details.
+       JSON: {"amount": <positive amount>}. The amount cannot exceed available
+       earnings. Pending requests reserve balance; failed requests release it.
+       This creates a payout request for manual processing; it does not initiate
+       a bank transfer automatically.
+
+PATCH  /api/seller/orders/update/<seller_order_id>/
+       Update status to pending, shipped, or delivered.
+       JSON: {"status": "shipped"}. Requires the owning seller's token.
+
+POST   /api/seller/kyc/
+       Submit KYC. Requires a token and an existing seller profile.
+       Multipart fields: pan, aadhaar, document (file).
+
+POST   /api/seller/bank/
+       Save bank details. Requires a token and an existing seller profile.
+       JSON: {"name": "...", "account": "...", "ifsc": "..."}
+
+Admin interface (not a REST API)
+--------------------------------
+/admin/
