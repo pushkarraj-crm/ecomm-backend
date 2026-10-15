@@ -95,11 +95,11 @@ class ProductListView(APIView):
             or has_catalog_options
         )
         if request.query_params or use_pagination:
-            cache_key = 'catalog:list:query:' + hashlib.sha256(
+            cache_key = 'catalog:list:query:v2:' + hashlib.sha256(
                 request.get_full_path().encode('utf-8')
             ).hexdigest()
         else:
-            cache_key = 'catalog:list:all:v1'
+            cache_key = 'catalog:list:all:v2'
 
         cached_data = cache.get(cache_key)
         if cached_data is not None:
@@ -125,7 +125,7 @@ class ProductListView(APIView):
 class ProductDetailView(APIView):
 
     def get(self, request, product_id):
-        cache_key = f'catalog:detail:v1:{product_id}'
+        cache_key = f'catalog:detail:v2:{product_id}'
         cached_data = cache.get(cache_key)
         if cached_data is not None:
             return Response(cached_data)
