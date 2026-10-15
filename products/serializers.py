@@ -30,7 +30,10 @@ class ProductReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'description', 'category', 'variants']
+        fields = [
+            'id', 'name', 'description', 'category', 'return_policy',
+            'return_days', 'variants',
+        ]
 
 
 # =========================
@@ -61,6 +64,29 @@ class ProductWriteSerializer(serializers.Serializer):
     description = serializers.CharField()
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
     variants = ProductVariantWriteSerializer(many=True)
+    return_policy = serializers.ChoiceField(
+        choices=Product.RETURN_POLICY_CHOICES,
+        default='no_return',
+    )
+    return_days = serializers.ChoiceField(
+        choices=Product.RETURN_DAY_CHOICES,
+        required=False,
+        allow_null=True,
+    )
+
+    def validate(self, attrs):
+        return_policy = attrs.get('return_policy', 'no_return')
+        return_days = attrs.get('return_days')
+        if return_policy == 'no_return' and return_days is not None:
+            raise serializers.ValidationError({
+                'return_days': 'Leave return_days empty when policy is no_return.'
+            })
+        if return_policy == 'return_and_exchange' and return_days is None:
+            raise serializers.ValidationError({
+                'return_days': 'Choose 2, 5, or 7 days for return and exchange.'
+            })
+        attrs['return_days'] = return_days
+        return attrs
 
 
 class ReviewWriteSerializer(serializers.Serializer):

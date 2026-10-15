@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import re
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
@@ -54,6 +55,30 @@ class SellerRegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
     business_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    store_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    owner_full_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    business_type = serializers.ChoiceField(
+        choices=[
+            'individual', 'sole_proprietorship', 'partnership', 'llp',
+            'private_limited', 'public_limited', 'other',
+        ],
+        required=False,
+    )
+    gst_registered = serializers.BooleanField(required=False, default=False)
+    gst_number = serializers.CharField(max_length=15, min_length=15, required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        gst_number = attrs.get('gst_number', '').strip().upper()
+        attrs['gst_number'] = gst_number
+        if gst_number and not re.fullmatch(
+            r'[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]', gst_number,
+        ):
+            raise serializers.ValidationError({'gst_number': 'Enter a valid 15-character GSTIN.'})
+        if attrs.get('gst_registered') and not gst_number:
+            raise serializers.ValidationError({'gst_number': 'Required when GST is enabled.'})
+        if not attrs.get('gst_registered') and gst_number:
+            raise serializers.ValidationError({'gst_number': 'Leave blank when GST is disabled.'})
+        return attrs
 
     def create(self, data):
         return UserService.create_seller(data)

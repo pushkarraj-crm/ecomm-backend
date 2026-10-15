@@ -16,6 +16,8 @@ class ProductService:
             name=validated_data['name'],
             description=validated_data['description'],
             category=validated_data['category'],
+            return_policy=validated_data['return_policy'],
+            return_days=validated_data['return_days'],
         )
 
         for index, variant_data in enumerate(validated_data['variants']):

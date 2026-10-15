@@ -281,6 +281,9 @@ EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', '').lower() == 'true'
 
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
+RAZORPAYX_KEY_ID = os.getenv('RAZORPAYX_KEY_ID', '')
+RAZORPAYX_KEY_SECRET = os.getenv('RAZORPAYX_KEY_SECRET', '')
+RAZORPAYX_SOURCE_ACCOUNT_NUMBER = os.getenv('RAZORPAYX_SOURCE_ACCOUNT_NUMBER', '')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

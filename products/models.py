@@ -34,12 +34,28 @@ class Category(models.Model):
 # 🛍️ PRODUCT
 # =========================
 class Product(models.Model):
+    RETURN_POLICY_CHOICES = (
+        ('no_return', 'No return'),
+        ('return_and_exchange', 'Return and exchange'),
+    )
+    RETURN_DAY_CHOICES = ((2, '2 days'), (5, '5 days'), (7, '7 days'))
+
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
     description = models.TextField()
+    return_policy = models.CharField(
+        max_length=24,
+        choices=RETURN_POLICY_CHOICES,
+        default='no_return',
+    )
+    return_days = models.PositiveSmallIntegerField(
+        choices=RETURN_DAY_CHOICES,
+        null=True,
+        blank=True,
+    )
 
     STATUS_CHOICES = (
         ('pending', 'Pending'),

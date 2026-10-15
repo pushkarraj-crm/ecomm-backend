@@ -12,9 +12,15 @@ from orders.invoices import generate_seller_invoice
 from orders.models import SellerOrder
 from orders.selectors import get_seller_order
 from orders.services import request_seller_order_refund
-from .services import create_or_update_kyc, create_or_update_bank, request_payout
+from .services import (
+    create_or_update_kyc, create_or_update_bank, request_payout,
+    start_bank_verification, refresh_bank_verification,
+    confirm_bank_verification_amount,
+)
 from .serializers import (
     BankDetailsInputSerializer,
+    BankAccountReadSerializer,
+    BankVerificationAmountSerializer,
     InventoryStockUpdateSerializer,
     KYCSubmissionSerializer,
     PayoutRequestSerializer,
@@ -23,6 +29,7 @@ from .serializers import (
     SellerPayoutHistorySerializer,
     SellerRefundRequestSerializer,
     SellerRefundSerializer,
+    SellerProfileSerializer,
 )
 from .selectors import (
     get_seller_business_analytics,
@@ -181,19 +188,96 @@ class KYCAPIView(APIView):
         return Response({"message": "KYC submitted"})
 
 
+class SellerProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSeller]
+
+    def get(self, request):
+        profile = get_seller_profile_for_user(request.user)
+        if profile is None:
+            raise Http404
+        return Response(SellerProfileSerializer(profile).data)
+
+    def patch(self, request):
+        profile = get_seller_profile_for_user(request.user)
+        if profile is None:
+            raise Http404
+        serializer = SellerProfileSerializer(profile, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
 class BankAPIView(APIView):
     permission_classes = [IsAuthenticated, IsSeller]
+
+    def get(self, request):
+        profile = get_seller_profile_for_user(request.user)
+        if profile is None:
+            raise Http404
+        bank = getattr(profile, 'bankaccount', None)
+        if bank is None:
+            return Response({'bank_account': None})
+        return Response(BankAccountReadSerializer(bank).data)
 
     def post(self, request):
         serializer = BankDetailsInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        create_or_update_bank(
+        bank = create_or_update_bank(
             request.user,
             account_holder_name=serializer.validated_data['name'],
             account_number=serializer.validated_data['account'],
             ifsc_code=serializer.validated_data['ifsc'],
         )
-        return Response({"message": "Bank details saved"})
+        return Response({
+            'message': 'Bank details saved. Start verification to enable payouts.',
+            'bank_account': BankAccountReadSerializer(bank).data,
+        })
+
+
+class BankVerificationAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSeller]
+
+    def get(self, request):
+        from .razorpayx import RazorpayXError
+        try:
+            bank = refresh_bank_verification(request.user)
+        except ValidationError as error:
+            return Response(error.detail, status=400)
+        except RazorpayXError as error:
+            return Response({'error': str(error)}, status=error.status_code)
+        return Response(BankAccountReadSerializer(bank).data)
+
+    def post(self, request):
+        from .razorpayx import RazorpayXError
+        try:
+            bank = start_bank_verification(request.user)
+        except ValidationError as error:
+            return Response(error.detail, status=400)
+        except RazorpayXError as error:
+            return Response({'error': str(error)}, status=error.status_code)
+        return Response({
+            'message': 'Follow the status to complete bank verification.',
+            'bank_account': BankAccountReadSerializer(bank).data,
+        })
+
+
+class BankVerificationConfirmAPIView(APIView):
+    permission_classes = [IsAuthenticated, IsSeller]
+
+    def post(self, request):
+        serializer = BankVerificationAmountSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        bank, verified = confirm_bank_verification_amount(
+            request.user,
+            serializer.validated_data['amount'],
+        )
+        payload = BankAccountReadSerializer(bank).data
+        if not verified:
+            payload['message'] = 'Amount did not match.'
+            payload['attempts_remaining'] = max(0, 3 - bank.verification_attempts)
+            return Response(payload, status=400)
+        payload['message'] = 'Bank account verified.'
+        return Response(payload)
 
 
 class PayoutAPIView(APIView):

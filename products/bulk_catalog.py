@@ -18,7 +18,7 @@ MAX_DATA_ROWS = 1000
 MAX_PRODUCTS = 100
 REQUIRED_COLUMNS = {
     'product_key', 'product_name', 'description', 'category_id',
-    'size', 'color', 'price', 'stock',
+    'size', 'color', 'price', 'stock', 'return_policy', 'return_days',
 }
 
 
@@ -30,18 +30,18 @@ def create_bulk_catalog_template():
     sheet.title = 'Catalog'
     sheet.append([
         'product_key', 'product_name', 'description', 'category_id',
-        'size', 'color', 'price', 'stock',
+        'size', 'color', 'price', 'stock', 'return_policy', 'return_days',
     ])
     sheet.append([
         'TSHIRT-001', 'Cotton T-shirt', 'Cotton crew-neck T-shirt',
-        1, 'M', 'Blue', 499.00, 25,
+        1, 'M', 'Blue', 499.00, 25, 'return_and_exchange', 5,
     ])
     sheet.append([
         'TSHIRT-001', 'Cotton T-shirt', 'Cotton crew-neck T-shirt',
-        1, 'L', 'Blue', 499.00, 18,
+        1, 'L', 'Blue', 499.00, 18, 'return_and_exchange', 5,
     ])
     sheet.freeze_panes = 'A2'
-    sheet.auto_filter.ref = 'A1:H1'
+    sheet.auto_filter.ref = 'A1:J1'
     instructions = workbook.create_sheet('Instructions')
     instructions.append(['Bulk catalog upload'])
     instructions.append(['Use the Catalog sheet; repeat product_key for each variant.'])
@@ -123,9 +123,14 @@ def _read_catalog_rows(upload):
                 category_value = Decimal(str(cells['category_id']))
                 price = Decimal(str(cells['price']))
                 stock_value = Decimal(str(cells['stock']))
+                return_policy = _cell_text(cells['return_policy'], row_number, 'return_policy').lower()
+                return_days_text = _cell_text(
+                    cells['return_days'], row_number, 'return_days', required=False,
+                )
+                return_days_value = Decimal(return_days_text) if return_days_text else None
             except (TypeError, ValueError, InvalidOperation):
                 raise ValidationError({
-                    'file': f'Row {row_number}: category_id, price, or stock is not a valid number.',
+                    'file': f'Row {row_number}: category, price, stock, or return_days is invalid.',
                 })
             if (
                 not category_value.is_finite()
@@ -146,6 +151,20 @@ def _read_catalog_rows(upload):
                 raise ValidationError({'file': f'Row {row_number}: stock cannot be negative.'})
             if stock > 2147483647:
                 raise ValidationError({'file': f'Row {row_number}: stock exceeds the supported maximum.'})
+            if return_policy not in {'no_return', 'return_and_exchange'}:
+                raise ValidationError({
+                    'file': f'Row {row_number}: return_policy must be no_return or return_and_exchange.',
+                })
+            if return_days_value is not None and (
+                not return_days_value.is_finite()
+                or return_days_value != return_days_value.to_integral_value()
+            ):
+                raise ValidationError({'file': f'Row {row_number}: return_days must be a whole number.'})
+            return_days = int(return_days_value) if return_days_value is not None else None
+            if return_policy == 'no_return' and return_days is not None:
+                raise ValidationError({'file': f'Row {row_number}: no_return must have blank return_days.'})
+            if return_policy == 'return_and_exchange' and return_days not in {2, 5, 7}:
+                raise ValidationError({'file': f'Row {row_number}: choose return_days 2, 5, or 7.'})
             size = _cell_text(cells['size'], row_number, 'size')
             color = _cell_text(cells['color'], row_number, 'color')
             if len(size) > 50 or len(color) > 50:
@@ -164,6 +183,8 @@ def _read_catalog_rows(upload):
                     'name': name,
                     'description': description,
                     'category_id': category_id,
+                    'return_policy': return_policy,
+                    'return_days': return_days,
                     'variants': [],
                     'variant_keys': set(),
                     'first_row': row_number,
@@ -173,6 +194,8 @@ def _read_catalog_rows(upload):
                 product['name'] != name
                 or product['description'] != description
                 or product['category_id'] != category_id
+                or product['return_policy'] != return_policy
+                or product['return_days'] != return_days
             ):
                 raise ValidationError({
                     'file': f'Row {row_number}: product details for product_key {key!r} must match its first row.',
@@ -240,6 +263,8 @@ def _persist_bulk_catalog(seller, grouped):
             category_id=data['category_id'],
             name=data['name'],
             description=data['description'],
+            return_policy=data['return_policy'],
+            return_days=data['return_days'],
             slug=unique_slug,
             status='pending',
         ))

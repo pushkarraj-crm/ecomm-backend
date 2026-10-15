@@ -43,7 +43,16 @@ class UserService:
         user.seller_status = 'pending'
         user.save(update_fields=['is_seller', 'is_customer', 'seller_status'])
 
-        create_seller_profile(user, data.get('business_name') or user.email)
+        store_name = data.get('store_name') or data.get('business_name') or user.email
+        create_seller_profile(
+            user,
+            store_name,
+            store_name=store_name,
+            owner_full_name=data.get('owner_full_name', ''),
+            business_type=data.get('business_type', ''),
+            gst_registered=data.get('gst_registered', False),
+            gst_number=data.get('gst_number') or None,
+        )
         return user
 
     @staticmethod

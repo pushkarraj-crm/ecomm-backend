@@ -12,8 +12,11 @@ from .views import (
     SellerBusinessAnalyticsAPIView,
     SellerBulkCatalogAPIView,
     SellerBulkCatalogTemplateAPIView,
+    SellerProfileAPIView,
     KYCAPIView,
     BankAPIView,
+    BankVerificationAPIView,
+    BankVerificationConfirmAPIView,
     PayoutAPIView,
 )
 
@@ -32,6 +35,9 @@ urlpatterns = [
     path('inventory/<int:variant_id>/', SellerInventoryStockAPIView.as_view()),
     path('orders/update/<int:pk>/', OrderStatusUpdateAPIView.as_view()),
     path('kyc/', KYCAPIView.as_view()),
+    path('profile/', SellerProfileAPIView.as_view()),
     path('bank/', BankAPIView.as_view()),
+    path('bank/verification/', BankVerificationAPIView.as_view()),
+    path('bank/verification/confirm/', BankVerificationConfirmAPIView.as_view()),
     path('payout/', PayoutAPIView.as_view()),
 ]

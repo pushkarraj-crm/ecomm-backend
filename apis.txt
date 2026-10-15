@@ -9,8 +9,10 @@ POST   /api/auth/register/
        addresses list can be included when a delivery address is available.
 
 POST   /api/auth/seller/register/
-       Register a seller. JSON: {"email": "...", "password": "...",
-       "business_name": "..."}. business_name is optional.
+       Register a seller. JSON may include store_name, owner_full_name,
+       business_type, gst_registered, and gst_number with email/password.
+       Seller profile fields are optional at signup; GSTIN is normalized and
+       format-checked.
 
 POST   /api/auth/customer/login/
        Sign in a customer. JSON: {"email": "...", "password": "..."}.
@@ -210,6 +212,19 @@ PATCH  /api/orders/update-status/<seller_order_id>/
 
 Seller
 ------
+GET    /api/seller/profile/
+       Get seller store/owner details, business type, GST information, and
+       pickup address. Requires a seller token.
+
+PATCH  /api/seller/profile/
+       Update store_name, owner_full_name, business_type, GST registration,
+       and pickup address. Business type may be individual,
+       sole_proprietorship, partnership, llp, private_limited, public_limited,
+       or other. GST verification status stays pending until an OTP provider is
+       configured. GST legal name/address are read-only provider results.
+       use_gst_registered_address requires verified GST; otherwise provide
+       pickup_address_line_1, pickup_city, pickup_state, and pickup_postal_code.
+
 GET    /api/seller/dashboard/
        Seller dashboard with total/pending/shipped/delivered order counts,
        stock summary, earnings summary, and the 10 most recent order cards.
@@ -271,7 +286,9 @@ GET    /api/seller/earnings/
 
 POST   /api/seller/catalog/single/
        Create one product with variants; same request format and image fields as
-       POST /api/products/create/. Requires an approved seller token.
+       POST /api/products/create/. Optional return_policy is no_return (default)
+       or return_and_exchange. return_and_exchange requires return_days of 2, 5,
+       or 7. Requires an approved seller token.
 
 GET    /api/seller/catalog/bulk/template/
        Download the .xlsx template for bulk catalog upload. Requires an approved
@@ -280,7 +297,8 @@ GET    /api/seller/catalog/bulk/template/
 POST   /api/seller/catalog/bulk/
        Upload an .xlsx workbook as multipart field `file`. Required columns:
        product_key, product_name, description, category_id, size, color, price,
-       stock. Repeat product_key on rows to add variants to the same product;
+       stock, return_policy, return_days. return_days is blank for no_return or
+       2, 5, or 7 for return_and_exchange. Repeat product_key on rows to add variants to the same product;
        use a category ID from GET /api/products/categories/; product details
        must match across those rows. Maximum 10 MB, 1000 data
        rows, and 100 products per upload. Products enter pending review. Requires
@@ -292,7 +310,8 @@ GET    /api/seller/payout/
        (maximum 100).
 
 POST   /api/seller/payout/
-       Request a payout. Requires KYC verification and saved bank details.
+       Request a payout. Requires KYC verification and a verified bank account
+       whose returned holder name matches the seller's verified legal name.
        JSON: {"amount": <positive amount>}. The amount cannot exceed available
        earnings. Pending requests reserve balance; failed requests release it.
        This creates a payout request for manual processing; it does not initiate
@@ -306,9 +325,26 @@ POST   /api/seller/kyc/
        Submit KYC. Requires a token and an existing seller profile.
        Multipart fields: pan, aadhaar, document (file).
 
+GET    /api/seller/bank/
+       Get saved bank details with the account number masked.
+
 POST   /api/seller/bank/
-       Save bank details. Requires a token and an existing seller profile.
-       JSON: {"name": "...", "account": "...", "ifsc": "..."}
+       Save bank details. JSON: {"name": "...", "account": "...",
+       "confirm_account": "...", "ifsc": "..."}. The account fields must match.
+
+POST   /api/seller/bank/verification/
+       Start RazorpayX Account Validation (penny-drop). Requires separate live
+       RazorpayX credentials and an allowlisted server IP. The bank returned
+       name must match the verified GST legal name when GST is enabled, or the
+       seller owner name otherwise. Status may be processing or amount_confirmation.
+
+GET    /api/seller/bank/verification/
+       Refresh the current validation status from RazorpayX.
+
+POST   /api/seller/bank/verification/confirm/
+       Confirm the ₹1–₹2 amount received in the seller bank account.
+       JSON: {"amount": 1.23}. Three incorrect attempts fail verification.
+       Payout requests require a verified bank account.
 
 Admin interface (not a REST API)
 --------------------------------
