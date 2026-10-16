@@ -1,4 +1,5 @@
-from django.db.models import Avg, Exists, F, Min, OuterRef, Q
+from django.db.models import Avg, Count, Exists, F, Min, OuterRef, Q, Subquery, IntegerField
+from django.db.models.functions import Coalesce
 from .models import Category, Product, ProductVariant, Review
 
 
@@ -12,10 +13,48 @@ PRODUCT_SORT_OPTIONS = {
 }
 
 
-def get_all_products(search=None, sort=None):
-    products = Product.objects.select_related('category').prefetch_related(
+def category_descendant_ids(category_id):
+    rows = list(Category.objects.values_list('id', 'parent_id'))
+    included = {category_id}
+    while True:
+        children = {pk for pk, parent in rows if parent in included}
+        if children <= included:
+            return included
+        included.update(children)
+
+
+def catalog_products():
+    reviews = Review.objects.filter(product_id=OuterRef('pk')).order_by().values('product_id')
+    return Product.objects.select_related('category', 'seller__seller_profile').prefetch_related(
         'variants__images'
-    ).filter(is_active=True, status='approved')
+    ).annotate(
+        catalog_price=Coalesce(Min('variants__price', filter=Q(variants__stock__gt=0)), Min('variants__price')),
+        catalog_rating=Subquery(reviews.annotate(value=Avg('rating')).values('value')[:1]),
+        catalog_review_count=Coalesce(Subquery(reviews.annotate(value=Count('id')).values('value')[:1], output_field=IntegerField()), 0),
+        catalog_in_stock=Exists(ProductVariant.objects.filter(product_id=OuterRef('pk'), stock__gt=0)),
+    )
+
+
+def get_all_products(search=None, sort=None, **filters):
+    products = catalog_products().filter(is_active=True, status='approved')
+    if 'category' in filters:
+        products = products.filter(category_id__in=category_descendant_ids(filters['category']))
+    if 'seller' in filters:
+        products = products.filter(seller_id=filters['seller'])
+    if 'min_rating' in filters:
+        products = products.filter(catalog_rating__gte=filters['min_rating'])
+    if 'in_stock' in filters:
+        products = products.filter(catalog_in_stock=filters['in_stock'])
+    variant_filters = {}
+    for name, lookup in [('min_price', 'price__gte'), ('max_price', 'price__lte'), ('size', 'size__iexact'), ('color', 'color__iexact')]:
+        if name in filters:
+            variant_filters[lookup] = filters[name]
+    if variant_filters:
+        # All variant constraints must match the same purchasable option.
+        variant_filters['stock__gt'] = 0
+        products = products.alias(matching_option=Exists(ProductVariant.objects.filter(
+            product_id=OuterRef('pk'), **variant_filters
+        ))).filter(matching_option=True)
 
     if search:
         # Each word may match any customer-visible product text or variant detail.
@@ -71,9 +110,7 @@ def get_seller_rating(seller):
 
 
 def get_product_detail(product_id):
-    return Product.objects.select_related('category').prefetch_related(
-        'variants__images'
-    ).filter(id=product_id).first()
+    return catalog_products().filter(id=product_id, is_active=True, status='approved').first()
 
 
 def get_category_tree(search=None):

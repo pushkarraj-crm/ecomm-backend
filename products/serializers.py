@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from decimal import Decimal
 from .models import Category, Product, ProductVariant, ProductImage, Review
 
 
@@ -27,12 +28,23 @@ class ProductVariantReadSerializer(serializers.ModelSerializer):
 # =========================
 class ProductReadSerializer(serializers.ModelSerializer):
     variants = ProductVariantReadSerializer(many=True, read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True, default=None)
+    seller = serializers.SerializerMethodField()
+    price = serializers.FloatField(source='catalog_price', read_only=True, allow_null=True)
+    average_rating = serializers.FloatField(source='catalog_rating', read_only=True, allow_null=True)
+    review_count = serializers.IntegerField(source='catalog_review_count', read_only=True)
+    in_stock = serializers.BooleanField(source='catalog_in_stock', read_only=True)
+
+    def get_seller(self, instance):
+        profile = getattr(instance.seller, 'seller_profile', None)
+        return {'id': instance.seller_id, 'store_name': (profile.store_name or profile.business_name) if profile else 'Marketplace seller'}
 
     class Meta:
         model = Product
         fields = [
             'id', 'slug', 'name', 'description', 'category', 'return_policy',
-            'return_days', 'variants',
+            'return_days', 'variants', 'category_name', 'seller', 'price',
+            'average_rating', 'review_count', 'in_stock',
         ]
 
 
@@ -119,3 +131,19 @@ class ProductImageUploadSerializer(serializers.Serializer):
         if value.size > 2 * 1024 * 1024:
             raise serializers.ValidationError("Image too large (max 2MB)")
         return value
+
+
+class CatalogFilterSerializer(serializers.Serializer):
+    category = serializers.IntegerField(min_value=1, required=False)
+    seller = serializers.IntegerField(min_value=1, required=False)
+    min_price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0'), required=False)
+    max_price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0'), required=False)
+    size = serializers.CharField(max_length=50, required=False)
+    color = serializers.CharField(max_length=50, required=False)
+    in_stock = serializers.BooleanField(required=False)
+    min_rating = serializers.DecimalField(max_digits=2, decimal_places=1, min_value=Decimal('0'), max_value=Decimal('5'), required=False)
+
+    def validate(self, attrs):
+        if attrs.get('min_price', 0) > attrs.get('max_price', Decimal('Infinity')):
+            raise serializers.ValidationError({'max_price': 'Must be at least min_price.'})
+        return attrs

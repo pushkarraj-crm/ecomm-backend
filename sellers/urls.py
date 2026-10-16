@@ -20,7 +20,12 @@ from .views import (
     PayoutAPIView,
 )
 
+from .catalog import SellerCatalogAPIView, SellerCatalogDetailAPIView, SellerCatalogSummaryAPIView
+
 urlpatterns = [
+    path('catalog/', SellerCatalogAPIView.as_view()),
+    path('catalog/summary/', SellerCatalogSummaryAPIView.as_view()),
+    path('catalog/<int:product_id>/', SellerCatalogDetailAPIView.as_view()),
     path('dashboard/', SellerDashboardAPIView.as_view()),
     path('orders/', SellerOrderListAPIView.as_view()),
     path('analytics/', SellerBusinessAnalyticsAPIView.as_view()),

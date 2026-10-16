@@ -349,3 +349,22 @@ POST   /api/seller/bank/verification/confirm/
 Admin interface (not a REST API)
 --------------------------------
 /admin/
+
+
+MARKETPLACE SHOPPING AND SELLER CATALOG EXTENSIONS
+================================================
+GET /api/products/?category=1&min_price=100&max_price=500&size=M&color=Blue&in_stock=true&min_rating=4&seller=2
+Optional filters: category (includes descendants), seller, min_price, max_price, size, color, in_stock, min_rating (0-5).
+Variant filters must match one in-stock variant; size and color use exact case-insensitive matching. Filtering opts into the existing paginated response. Existing search, sort, page, page_size and unfiltered array responses remain supported.
+Product list/detail now include category_name, seller {id, store_name}, price (lowest available variant, falling back to lowest variant if sold out), average_rating (null if unrated), review_count, in_stock. Public detail only exposes approved, active products. No seller email, bank, KYC or tax details are included.
+
+Seller endpoints require an authenticated, non-blacklisted seller and are scoped to their own listings:
+GET /api/seller/catalog/?status=pending&search=shirt&category=1&is_active=true&page=1
+GET /api/seller/catalog/summary/ -> total, approved, pending, rejected, active, inactive
+GET /api/seller/catalog/<product_id>/ -> own product including status, is_active and timestamps
+PATCH /api/seller/catalog/<product_id>/ -> name, description, category, is_active, return_policy, return_days
+Product-content edits are submitted for admin approval (pending); pause/resume alone preserves approval. Slugs remain stable. Sellers cannot set approval status. Use the seller detail endpoint to view listings under review.
+PATCH /api/seller/inventory/<variant_id>/ -> stock and/or price; non-negative whole stock, positive price with up to 2 decimal places. Existing stock-only requests remain supported.
+Catalog caches refresh after committed product, variant, category, image, review, seller-profile and paid-order stock changes.
+
+No cash-on-delivery, shipping guarantee, free delivery, commission policy, claims workflow or training provider is implied by these APIs. These require separate business rules/integrations.

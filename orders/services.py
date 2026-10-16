@@ -216,6 +216,8 @@ def _mark_payment_paid(payment_id, razorpay_payment_id):
         ProductVariant.objects.filter(pk=ordered_item.product_variant_id).update(
             stock=F('stock') - ordered_item.quantity,
         )
+    from products.cache import invalidate_catalog
+    transaction.on_commit(invalidate_catalog)
     _remove_paid_items_from_cart(payment.order)
     return payment.order
 

@@ -21,12 +21,14 @@ from .selectors import (
 )
 from .models import Product, ProductInteraction
 from .serializers import (
+    CatalogFilterSerializer,
     ProductReadSerializer,
     ProductWriteSerializer,
     ProductImageUploadSerializer,
     ReviewWriteSerializer,
 )
 from core.pagination import ProductPagination
+from .cache import catalog_revision
 
 
 # =========================
@@ -88,24 +90,26 @@ class ProductListView(APIView):
             valid_options = ', '.join(sorted(PRODUCT_SORT_OPTIONS))
             raise ValidationError({'sort': f'Choose one of: {valid_options}.'})
 
-        has_catalog_options = bool(search or sort)
+        filters = CatalogFilterSerializer(data=request.query_params.dict())
+        filters.is_valid(raise_exception=True)
+        has_catalog_options = bool(search or sort or filters.validated_data)
         use_pagination = (
             'page' in request.query_params
             or 'page_size' in request.query_params
             or has_catalog_options
         )
         if request.query_params or use_pagination:
-            cache_key = 'catalog:list:query:v2:' + hashlib.sha256(
+            cache_key = f'catalog:list:query:v3:{catalog_revision()}:' + hashlib.sha256(
                 request.get_full_path().encode('utf-8')
             ).hexdigest()
         else:
-            cache_key = 'catalog:list:all:v2'
+            cache_key = f'catalog:list:all:v3:{catalog_revision()}'
 
         cached_data = cache.get(cache_key)
         if cached_data is not None:
             return Response(cached_data)
 
-        products = get_all_products(search=search or None, sort=sort or None)
+        products = get_all_products(search=search or None, sort=sort or None, **filters.validated_data)
         if use_pagination:
             paginator = ProductPagination()
             page = paginator.paginate_queryset(products, request, view=self)
@@ -125,7 +129,7 @@ class ProductListView(APIView):
 class ProductDetailView(APIView):
 
     def get(self, request, product_id):
-        cache_key = f'catalog:detail:v2:{product_id}'
+        cache_key = f'catalog:detail:v3:{catalog_revision()}:{product_id}'
         cached_data = cache.get(cache_key)
         if cached_data is not None:
             return Response(cached_data)
@@ -147,7 +151,7 @@ class CategoryListView(APIView):
         search = request.query_params.get('search', '').strip()
         if len(search) > 100:
             raise ValidationError({'search': 'Search must be 100 characters or fewer.'})
-        cache_key = 'catalog:categories:v1:' + hashlib.sha256(
+        cache_key = f'catalog:categories:v2:{catalog_revision()}:' + hashlib.sha256(
             search.casefold().encode('utf-8')
         ).hexdigest()
         categories = cache.get(cache_key)

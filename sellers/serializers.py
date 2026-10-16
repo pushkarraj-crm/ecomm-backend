@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from decimal import Decimal
 import re
 
 from orders.models import Refund, SellerOrder
@@ -186,7 +187,13 @@ class SellerInventoryVariantSerializer(serializers.ModelSerializer):
 
 
 class InventoryStockUpdateSerializer(serializers.Serializer):
-    stock = serializers.IntegerField(min_value=0)
+    stock = serializers.IntegerField(min_value=0, required=False)
+    price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0.01'), required=False)
+
+    def validate(self, attrs):
+        if not attrs:
+            raise serializers.ValidationError('Provide stock or price.')
+        return attrs
 
 
 class SellerRefundRequestSerializer(serializers.Serializer):

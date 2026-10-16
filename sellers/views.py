@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db import transaction
 from datetime import date, datetime, time, timedelta
 from django.http import Http404, HttpResponse
 from django.utils import timezone
@@ -103,19 +104,21 @@ class SellerInventoryAPIView(APIView):
 class SellerInventoryStockAPIView(APIView):
     permission_classes = [IsAuthenticated, IsSeller]
 
+    @transaction.atomic
     def patch(self, request, variant_id):
         serializer = InventoryStockUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        variant = ProductVariant.objects.filter(
+        variant = ProductVariant.objects.select_for_update().filter(
             id=variant_id,
             product__seller=request.user,
         ).first()
         if variant is None:
             raise Http404
 
-        variant.stock = serializer.validated_data['stock']
-        variant.save(update_fields=['stock'])
+        for field, value in serializer.validated_data.items():
+            setattr(variant, field, value)
+        variant.save(update_fields=list(serializer.validated_data))
         return Response(SellerInventoryVariantSerializer(variant).data)
 
 
