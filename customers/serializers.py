@@ -91,7 +91,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 class CustomerProfileInputSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
     mobile_number = serializers.CharField(max_length=20)
-    addresses = CustomerAddressInputSerializer(many=True, required=True, allow_empty=False)
+    addresses = CustomerAddressInputSerializer(many=True, required=False, allow_empty=False)
 
     def validate_addresses(self, addresses):
         if sum(address.get('is_default', False) for address in addresses) > 1:

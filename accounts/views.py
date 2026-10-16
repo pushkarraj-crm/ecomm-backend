@@ -49,7 +49,10 @@ class LoginView(APIView):
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
 
+        profile = getattr(user, "customer_profile", None) if not user.is_seller else None
         return Response({
+            "name": profile.name if profile else "",
+            "mobile_number": profile.mobile_number if profile else "",
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "is_seller": user.is_seller,
