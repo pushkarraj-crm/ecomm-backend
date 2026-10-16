@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: d2c-marketplace-api
+    runtime: python
+    plan: free
+    region: singapore
+    branch: main
+    repo: https://github.com/pushkarraj-crm/ecomm-backend
+    buildCommand: pip install -r requirements-render.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate --noinput && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120 --access-logfile -
+    healthCheckPath: /health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.12
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings_hosted
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://d2c-storefront.vercel.app,https://d2c-seller-dashboard.vercel.app
+      - key: TRUST_PROXY_SSL
+        value: "True"
+      - key: TRUSTED_PROXY_COUNT
+        value: "1"
