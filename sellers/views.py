@@ -116,6 +116,11 @@ class SellerInventoryStockAPIView(APIView):
         if variant is None:
             raise Http404
 
+        original = serializer.validated_data.get("original_price", variant.original_price)
+        price = serializer.validated_data.get("price", variant.price)
+        if original is not None and float(original) < float(price):
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({"original_price": "Must be at least the selling price."})
         for field, value in serializer.validated_data.items():
             setattr(variant, field, value)
         variant.save(update_fields=list(serializer.validated_data))

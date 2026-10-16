@@ -1,4 +1,4 @@
-from django.db.models import Avg, Count, Exists, F, Min, OuterRef, Q, Subquery, IntegerField
+from django.db.models import Avg, Count, Exists, F, Min, OuterRef, Q, Subquery, IntegerField, Prefetch
 from django.db.models.functions import Coalesce
 from .models import Category, Product, ProductVariant, Review
 
@@ -26,7 +26,7 @@ def category_descendant_ids(category_id):
 def catalog_products():
     reviews = Review.objects.filter(product_id=OuterRef('pk')).order_by().values('product_id')
     return Product.objects.select_related('category', 'seller__seller_profile').prefetch_related(
-        'variants__images'
+        'variants__images', Prefetch('reviews', queryset=Review.objects.order_by('-id'), to_attr='public_reviews')
     ).annotate(
         catalog_price=Coalesce(Min('variants__price', filter=Q(variants__stock__gt=0)), Min('variants__price')),
         catalog_rating=Subquery(reviews.annotate(value=Avg('rating')).values('value')[:1]),
@@ -115,7 +115,7 @@ def get_product_detail(product_id):
 
 def get_category_tree(search=None):
     """Build the category picker tree from one bounded category query."""
-    categories = list(Category.objects.only('id', 'name', 'parent_id').order_by('name', 'id'))
+    categories = list(Category.objects.only('id', 'name', 'parent_id', 'image').order_by('name', 'id'))
     by_id = {category.id: category for category in categories}
     included = set(by_id)
     if search:
@@ -151,6 +151,7 @@ def get_category_tree(search=None):
             'id': category.id,
             'name': category.name,
             'parent_id': category.parent_id,
+            'image': category.image.url if category.image else None,
             'children': child_nodes,
         }
 

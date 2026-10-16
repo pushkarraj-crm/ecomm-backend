@@ -26,11 +26,13 @@ class SellerCatalogQuerySerializer(serializers.Serializer):
 
 
 class SellerCatalogUpdateSerializer(serializers.ModelSerializer):
+    specifications = serializers.DictField(child=serializers.CharField(max_length=500), required=False)
+    size_guide = serializers.CharField(max_length=4000, required=False, allow_blank=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=False)
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'category', 'is_active', 'return_policy', 'return_days']
+        fields = ['name', 'description', 'specifications', 'size_guide', 'category', 'is_active', 'return_policy', 'return_days']
         extra_kwargs = {'name': {'required': False}, 'description': {'required': False}}
 
     def validate(self, attrs):

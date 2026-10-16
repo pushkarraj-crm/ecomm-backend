@@ -32,6 +32,11 @@ class SellerOrderSerializer(serializers.ModelSerializer):
     payment_status = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(source='order.created_at', read_only=True)
     customer = serializers.SerializerMethodField()
+    customer_requests = serializers.SerializerMethodField()
+
+    def get_customer_requests(self, instance):
+        return list(instance.customer_requests.values("id", "kind", "reason", "status", "response", "created_at"))
+
     refunds = SellerRefundSerializer(many=True, read_only=True)
 
     class Meta:
@@ -39,6 +44,7 @@ class SellerOrderSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'order_id', 'seller', 'total_amount', 'status', 'order_status',
             'payment_status', 'created_at', 'customer', 'items', 'refunds',
+            'carrier', 'tracking_number', 'tracking_url', 'delivered_at', 'customer_requests',
         ]
 
     def get_payment_status(self, seller_order):
@@ -85,7 +91,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'state',
             'postal_code',
             'country',
-            'total_amount',
+            'total_amount', 'coupon_code', 'discount_amount',
             'created_at',
             'status',
             'payment_status',
@@ -100,6 +106,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class CheckoutSerializer(serializers.Serializer):
+    coupon_code = serializers.CharField(max_length=40, required=False, allow_blank=True)
     name = serializers.CharField(max_length=255)
     phone = serializers.CharField(max_length=15)
     address_id = serializers.IntegerField(min_value=1, required=False)

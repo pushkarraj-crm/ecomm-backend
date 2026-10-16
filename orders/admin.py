@@ -39,3 +39,22 @@ class RefundAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         update_refund_status(obj.id, obj.status, obj.failure_reason)
+
+
+from .models import CustomerOrderRequest
+
+@admin.register(CustomerOrderRequest)
+class CustomerOrderRequestAdmin(admin.ModelAdmin):
+    list_display = ['id', 'seller_order', 'kind', 'status', 'created_at']
+    list_filter = ['kind', 'status']
+    readonly_fields = ['seller_order', 'kind', 'reason', 'created_at', 'updated_at']
+    fields = ['seller_order', 'kind', 'reason', 'status', 'response', 'created_at', 'updated_at']
+
+
+from .models import Coupon
+
+@admin.register(Coupon)
+class CouponAdmin(admin.ModelAdmin):
+    list_display = ['code', 'seller', 'percent', 'minimum_subtotal', 'starts_at', 'expires_at', 'is_active']
+    list_filter = ['is_active']
+    search_fields = ['code', 'seller__email']

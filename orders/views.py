@@ -213,7 +213,7 @@ class OrderStatusUpdateAPIView(APIView):
 
         serializer = OrderStatusUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        update_seller_order_status(order, serializer.validated_data['status'])
+        order = update_seller_order_status(order, serializer.validated_data['status'])
 
         return Response({
             "message": "Order status updated",
@@ -238,3 +238,81 @@ class CustomerOrderHistoryAPIView(APIView):
             "next": paginator.get_next_link(),
             "previous": paginator.get_previous_link(),
         })
+
+
+class ShipmentTrackingView(APIView):
+    permission_classes = [IsAuthenticated, IsSeller]
+
+    def patch(self, request, pk):
+        from rest_framework import serializers
+        class TrackingSerializer(serializers.Serializer):
+            carrier = serializers.CharField(max_length=100, allow_blank=True)
+            tracking_number = serializers.CharField(max_length=150, allow_blank=True)
+            tracking_url = serializers.URLField(allow_blank=True)
+
+            def validate_tracking_url(self, value):
+                if value and not value.startswith('https://'):
+                    raise serializers.ValidationError('Use an HTTPS carrier tracking link.')
+                return value
+        order = get_seller_order(request.user, pk)
+        if order is None:
+            raise Http404
+        serializer = TrackingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        for key, value in serializer.validated_data.items():
+            setattr(order, key, value)
+        order.save(update_fields=list(serializer.validated_data))
+        return Response(SellerOrderSerializer(order).data)
+
+
+class CustomerOrderRequestView(APIView):
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def post(self, request, pk):
+        from django.db import transaction
+        from django.utils import timezone
+        from datetime import timedelta
+        from .models import SellerOrder, CustomerOrderRequest
+        from rest_framework.exceptions import ValidationError
+        with transaction.atomic():
+            order = SellerOrder.objects.select_for_update().filter(pk=pk, order__user=request.user).select_related('order').first()
+            if order is None:
+                raise Http404
+            kind = request.data.get('kind')
+            reason = request.data.get('reason', '')
+            if kind not in ('cancel', 'return', 'refund') or not isinstance(reason, str) or not 10 <= len(reason.strip()) <= 2000:
+                raise ValidationError('Choose cancel, return or refund and provide a reason of 10–2000 characters.')
+            if order.order.status not in ('paid', 'partially_refunded'):
+                raise ValidationError('Requests require a paid order.')
+            if kind == 'cancel' and order.status != 'pending':
+                raise ValidationError('Cancellation can only be requested before dispatch.')
+            if kind == 'return':
+                if order.status != 'delivered' or not order.delivered_at:
+                    raise ValidationError('Returns require a recorded delivery date.')
+                items = list(order.items.select_related('product_variant__product'))
+                def eligible(item):
+                    policy = item.return_policy if item.return_policy is not None else item.product_variant.product.return_policy
+                    days = item.return_days if item.return_policy is not None else item.product_variant.product.return_days
+                    return policy == 'return_and_exchange' and days and timezone.now() <= order.delivered_at + timedelta(days=days)
+                if not items or not all(eligible(item) for item in items):
+                    raise ValidationError('This shipment is outside its return eligibility. Contact support for help.')
+            obj, created = CustomerOrderRequest.objects.get_or_create(seller_order=order, kind=kind, defaults={'reason': reason.strip()})
+        return Response({'id': obj.id, 'status': obj.status, 'message': 'Request received for review. This does not automatically cancel the order or refund payment.'}, status=201 if created else 200)
+
+
+class CouponPreviewView(APIView):
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def post(self, request):
+        from .promotions import price_cart
+        from cart.selectors import get_cart_for_user
+        from rest_framework.exceptions import ValidationError
+        code = request.data.get('coupon_code', '')
+        if not isinstance(code, str) or len(code) > 40:
+            raise ValidationError({'coupon_code': 'Enter a coupon code of at most 40 characters.'})
+        cart = get_cart_for_user(request.user)
+        if not cart or not cart.items.exists():
+            raise ValidationError({'cart': 'Your cart is empty.'})
+        result = price_cart(list(cart.items.select_related('product_variant__product')), code)
+        return Response({'coupon_code': result['coupon_code'], 'subtotal': result['subtotal_paise']/100,
+                         'total': result['total_paise']/100, 'discount': result['discount_paise']/100})

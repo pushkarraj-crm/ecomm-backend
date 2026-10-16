@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    StoreContentView, DeliveryCheckView,
     CreateProductView,
     ProductListView,
     ProductDetailView,
@@ -9,6 +10,8 @@ from .views import (
 )
 
 urlpatterns = [
+    path('store-content/', StoreContentView.as_view()),
+    path('delivery/', DeliveryCheckView.as_view()),
     path('', ProductListView.as_view()),                 # GET all products
     path('categories/', CategoryListView.as_view()),     # GET seller category tree
     path('create/', CreateProductView.as_view()),        # POST create

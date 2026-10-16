@@ -10,7 +10,7 @@ def get_seller_orders(seller, status=None):
     if status:
         orders = orders.filter(status=status)
     return orders.select_related('order', 'order__payment').prefetch_related(
-        'items__product_variant__product', 'refunds'
+        'items__product_variant__product', 'refunds', 'customer_requests'
     ).order_by('-id')
 
 
@@ -18,14 +18,14 @@ def get_seller_order(seller, order_id):
     return SellerOrder.objects.filter(seller=seller, id=order_id).filter(
         Q(order__payment__isnull=True) | Q(order__payment__status='paid')
     ).select_related('order', 'order__payment', 'order__user').prefetch_related(
-        'items__product_variant__product', 'refunds'
+        'items__product_variant__product', 'refunds', 'customer_requests'
     ).first()
 
 
 def get_customer_orders(customer):
     return Order.objects.filter(user=customer).select_related('payment').prefetch_related(
         'seller_orders__items__product_variant__product',
-        'seller_orders__refunds',
+        'seller_orders__refunds', 'seller_orders__customer_requests',
     ).order_by('-id')
 
 

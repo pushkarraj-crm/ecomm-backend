@@ -1,5 +1,5 @@
 from django.urls import path
-from orders.views import SellerDashboardAPIView, OrderStatusUpdateAPIView
+from orders.views import SellerDashboardAPIView, OrderStatusUpdateAPIView, ShipmentTrackingView
 from products.views import CreateProductView
 from .views import (
     SellerInventoryAPIView,
@@ -23,6 +23,7 @@ from .views import (
 from .catalog import SellerCatalogAPIView, SellerCatalogDetailAPIView, SellerCatalogSummaryAPIView
 
 urlpatterns = [
+    path('orders/<int:pk>/tracking/', ShipmentTrackingView.as_view()),
     path('catalog/', SellerCatalogAPIView.as_view()),
     path('catalog/summary/', SellerCatalogSummaryAPIView.as_view()),
     path('catalog/<int:product_id>/', SellerCatalogDetailAPIView.as_view()),

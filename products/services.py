@@ -15,6 +15,8 @@ class ProductService:
             seller=user,
             name=validated_data['name'],
             description=validated_data['description'],
+            specifications=validated_data.get('specifications', {}),
+            size_guide=validated_data.get('size_guide', ''),
             category=validated_data['category'],
             return_policy=validated_data['return_policy'],
             return_days=validated_data['return_days'],

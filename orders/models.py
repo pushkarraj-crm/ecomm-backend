@@ -37,6 +37,8 @@ class Order(models.Model):
     # tracks seller fulfillment (pending, shipped, delivered).
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
     total_amount = models.FloatField(default=0)
+    coupon_code = models.CharField(max_length=40, blank=True)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -85,6 +87,10 @@ class SellerOrder(models.Model):
     )
 
     total_amount = models.FloatField(default=0)
+    carrier = models.CharField(max_length=100, blank=True)
+    tracking_number = models.CharField(max_length=150, blank=True)
+    tracking_url = models.URLField(blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
 
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -125,6 +131,8 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE
     )
 
+    return_policy = models.CharField(max_length=24, null=True, blank=True)
+    return_days = models.PositiveSmallIntegerField(null=True, blank=True)
     quantity = models.IntegerField()
     price = models.FloatField()  # price at purchase time
 
@@ -176,3 +184,43 @@ class Refund(models.Model):
 
     def __str__(self):
         return f"Refund {self.id} for seller order #{self.seller_order_id} ({self.status})"
+
+
+class CustomerOrderRequest(models.Model):
+    seller_order = models.ForeignKey(SellerOrder, related_name='customer_requests', on_delete=models.CASCADE)
+    kind = models.CharField(max_length=12, choices=[('cancel', 'Cancellation'), ('return', 'Return'), ('refund', 'Refund enquiry')])
+    reason = models.TextField(max_length=2000)
+    status = models.CharField(max_length=12, default='pending', choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected'), ('resolved', 'Resolved')])
+    response = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['seller_order', 'kind'], name='customer_request_order_kind')]
+
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=40, unique=True)
+    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={'is_seller': True})
+    percent = models.PositiveSmallIntegerField(help_text='Seller-funded percentage, applied to this seller’s items only.')
+    minimum_subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    starts_at = models.DateTimeField()
+    expires_at = models.DateTimeField()
+    is_active = models.BooleanField(default=False)
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if not 1 <= self.percent <= 95:
+            raise ValidationError('Discount must be between 1 and 95 percent.')
+        if self.starts_at and self.expires_at and self.starts_at >= self.expires_at:
+            raise ValidationError('Expiry must follow the start time.')
+        if self.minimum_subtotal < 0:
+            raise ValidationError('Minimum subtotal cannot be negative.')
+
+    def save(self, *args, **kwargs):
+        self.code = self.code.strip().upper()
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.code

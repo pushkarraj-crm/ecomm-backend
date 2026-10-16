@@ -183,10 +183,11 @@ class SellerInventoryVariantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductVariant
-        fields = ['id', 'product_id', 'product_name', 'size', 'color', 'price', 'stock']
+        fields = ['id', 'product_id', 'product_name', 'size', 'color', 'price', 'original_price', 'stock']
 
 
 class InventoryStockUpdateSerializer(serializers.Serializer):
+    original_price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal("0.01"), required=False, allow_null=True)
     stock = serializers.IntegerField(min_value=0, required=False)
     price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0.01'), required=False)
 

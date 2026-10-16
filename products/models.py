@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 # =========================
 class Category(models.Model):
     name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to="categories/", blank=True)
 
     parent = models.ForeignKey(
         'self',
@@ -46,6 +47,8 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
     description = models.TextField()
+    specifications = models.JSONField(default=dict, blank=True)
+    size_guide = models.TextField(blank=True, max_length=4000)
     return_policy = models.CharField(
         max_length=24,
         choices=RETURN_POLICY_CHOICES,
@@ -101,9 +104,16 @@ class ProductVariant(models.Model):
 
     price = models.FloatField()
     stock = models.IntegerField()
+    original_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     class Meta:
         indexes = [models.Index(fields=['product', 'stock'], name='variant_product_stock_idx')]
+
+    def clean(self):
+        if self.price <= 0 or self.stock < 0:
+            raise ValidationError("Price must be positive and stock cannot be negative.")
+        if self.original_price is not None and float(self.original_price) < self.price:
+            raise ValidationError({"original_price": "Must be at least the selling price."})
 
     def __str__(self):
         return f"{self.product.name} - {self.size} - {self.color}"
@@ -141,3 +151,35 @@ class ProductInteraction(models.Model):
         indexes = [
             models.Index(fields=['product', 'created_at', 'event'], name='product_date_event_idx'),
         ]
+
+
+class StoreBanner(models.Model):
+    title = models.CharField(max_length=120)
+    subtitle = models.CharField(max_length=250, blank=True)
+    image = models.ImageField(upload_to='banners/', blank=True)
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL)
+    is_active = models.BooleanField(default=True)
+    position = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['position', 'id']
+
+    def __str__(self):
+        return self.title
+
+
+class DeliveryArea(models.Model):
+    postal_code = models.CharField(max_length=6, unique=True)
+    city = models.CharField(max_length=100)
+    min_days = models.PositiveSmallIntegerField(default=3)
+    max_days = models.PositiveSmallIntegerField(default=7)
+    is_active = models.BooleanField(default=True)
+
+    def clean(self):
+        if len(self.postal_code) != 6 or not self.postal_code.isdigit():
+            raise ValidationError('Enter a six-digit Indian pincode.')
+        if self.min_days > self.max_days:
+            raise ValidationError('Maximum delivery days must be at least the minimum.')
+
+    def __str__(self):
+        return f'{self.postal_code} — {self.city}'

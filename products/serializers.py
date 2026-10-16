@@ -20,13 +20,18 @@ class ProductVariantReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductVariant
-        fields = ['id', 'size', 'color', 'price', 'stock', 'images']
+        fields = ['id', 'size', 'color', 'price', 'original_price', 'stock', 'images']
 
 
 # =========================
 # 🛍️ PRODUCT (READ)
 # =========================
 class ProductReadSerializer(serializers.ModelSerializer):
+    reviews = serializers.SerializerMethodField()
+
+    def get_reviews(self, instance):
+        return [{'id': review.id, 'rating': review.rating, 'comment': review.comment} for review in instance.public_reviews[:50]] if hasattr(instance, 'public_reviews') else list(instance.reviews.order_by('-id').values('id', 'rating', 'comment')[:50])
+
     variants = ProductVariantReadSerializer(many=True, read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True, default=None)
     seller = serializers.SerializerMethodField()
@@ -42,9 +47,9 @@ class ProductReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'slug', 'name', 'description', 'category', 'return_policy',
+            'id', 'slug', 'name', 'description', 'specifications', 'size_guide', 'category', 'return_policy',
             'return_days', 'variants', 'category_name', 'seller', 'price',
-            'average_rating', 'review_count', 'in_stock',
+            'average_rating', 'review_count', 'in_stock', 'reviews',
         ]
 
 
@@ -56,6 +61,12 @@ class ProductVariantWriteSerializer(serializers.Serializer):
     color = serializers.CharField()
     price = serializers.FloatField()
     stock = serializers.IntegerField()
+    original_price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal("0.01"), allow_null=True, required=False)
+
+    def validate(self, attrs):
+        if attrs.get("original_price") is not None and attrs["original_price"] < Decimal(str(attrs["price"])):
+            raise serializers.ValidationError({"original_price": "Must be at least the selling price."})
+        return attrs
 
     def validate_price(self, value):
         if value <= 0:
@@ -72,6 +83,8 @@ class ProductVariantWriteSerializer(serializers.Serializer):
 # ✍️ PRODUCT (WRITE)
 # =========================
 class ProductWriteSerializer(serializers.Serializer):
+    specifications = serializers.DictField(child=serializers.CharField(max_length=500), required=False, default=dict)
+    size_guide = serializers.CharField(max_length=4000, required=False, allow_blank=True, default="")
     name = serializers.CharField()
     description = serializers.CharField()
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())

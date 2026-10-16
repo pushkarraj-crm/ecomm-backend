@@ -99,11 +99,11 @@ class ProductListView(APIView):
             or has_catalog_options
         )
         if request.query_params or use_pagination:
-            cache_key = f'catalog:list:query:v3:{catalog_revision()}:' + hashlib.sha256(
+            cache_key = f'catalog:list:query:v5:{catalog_revision()}:' + hashlib.sha256(
                 request.get_full_path().encode('utf-8')
             ).hexdigest()
         else:
-            cache_key = f'catalog:list:all:v3:{catalog_revision()}'
+            cache_key = f'catalog:list:all:v5:{catalog_revision()}'
 
         cached_data = cache.get(cache_key)
         if cached_data is not None:
@@ -129,7 +129,7 @@ class ProductListView(APIView):
 class ProductDetailView(APIView):
 
     def get(self, request, product_id):
-        cache_key = f'catalog:detail:v3:{catalog_revision()}:{product_id}'
+        cache_key = f'catalog:detail:v5:{catalog_revision()}:{product_id}'
         cached_data = cache.get(cache_key)
         if cached_data is not None:
             return Response(cached_data)
@@ -197,3 +197,38 @@ class AddReviewView(APIView):
         )
 
         return Response({"msg": "Review added"})
+
+
+class StoreContentView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        from .models import StoreBanner
+        return Response({'banners': [
+            {'id': b.id, 'title': b.title, 'subtitle': b.subtitle,
+             'image': request.build_absolute_uri(b.image.url) if b.image else None,
+             'category': b.category_id}
+            for b in StoreBanner.objects.filter(is_active=True)[:12]
+        ]})
+
+
+class DeliveryCheckView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        from .models import DeliveryArea
+        from datetime import timedelta
+        from django.utils import timezone
+        code = request.query_params.get('postal_code', '')
+        if len(code) != 6 or not code.isdigit():
+            return Response({'error': 'Enter a valid six-digit Indian pincode.'}, status=400)
+        area = DeliveryArea.objects.filter(postal_code=code, is_active=True).first()
+        if not area:
+            return Response({'available': False, 'message': 'Delivery is not confirmed for this pincode. Please contact support.'})
+        today = timezone.localdate()
+        return Response({'available': True, 'city': area.city,
+                         'earliest': today + timedelta(days=area.min_days),
+                         'latest': today + timedelta(days=area.max_days),
+                         'message': 'Estimated delivery; the seller confirms dispatch after purchase.'})

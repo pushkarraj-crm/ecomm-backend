@@ -62,3 +62,15 @@ admin.site.register(ProductVariant, ProductVariantAdmin)
 admin.site.register(ProductImage)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Review)
+
+from .models import StoreBanner, DeliveryArea
+
+@admin.register(StoreBanner)
+class StoreBannerAdmin(admin.ModelAdmin):
+    list_display = ['title', 'category', 'is_active', 'position']
+    list_editable = ['is_active', 'position']
+
+@admin.register(DeliveryArea)
+class DeliveryAreaAdmin(admin.ModelAdmin):
+    list_display = ['postal_code', 'city', 'min_days', 'max_days', 'is_active']
+    search_fields = ['postal_code', 'city']

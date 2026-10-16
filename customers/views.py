@@ -124,3 +124,22 @@ class AddToCartView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class SupportTicketView(APIView):
+    permission_classes = [IsAuthenticated, IsCustomer]
+
+    def get(self, request):
+        from .models import SupportTicket
+        return Response(list(SupportTicket.objects.filter(user=request.user).order_by('-id').values('id','subject','message','status','response','created_at')[:50]))
+
+    def post(self, request):
+        from rest_framework import serializers
+        from .models import SupportTicket
+        class TicketInput(serializers.Serializer):
+            subject = serializers.CharField(max_length=150, min_length=5)
+            message = serializers.CharField(max_length=4000, min_length=10)
+        serializer=TicketInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ticket=SupportTicket.objects.create(user=request.user, **serializer.validated_data)
+        return Response({'id':ticket.id,'status':ticket.status}, status=201)

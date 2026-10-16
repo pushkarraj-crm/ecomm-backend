@@ -83,13 +83,15 @@ def create_order_from_cart(user, data):
             )
         }
 
+    from .promotions import price_cart
+    pricing = price_cart(items, data.get('coupon_code', ''))
     order = Order.objects.create(
         user=user,
         name=data['name'],
         phone=data['phone'],
         email=user.email,
         **delivery_address,
-        total_amount=0
+        total_amount=0, coupon_code=pricing['coupon_code'], discount_amount=Decimal(pricing['discount_paise'])/100
     )
 
     seller_map = defaultdict(list)
@@ -110,13 +112,15 @@ def create_order_from_cart(user, data):
         )
 
         for item in seller_items:
-            price_paise = amount_to_paise(item.product_variant.price)
+            price_paise = pricing['prices'][item.pk]
             price = price_paise / 100
 
             OrderItem.objects.create(
                 seller_order=seller_order,
                 product_variant=item.product_variant,
                 quantity=item.quantity,
+                return_policy=item.product_variant.product.return_policy,
+                return_days=item.product_variant.product.return_days,
                 price=price
             )
 
@@ -137,6 +141,8 @@ def create_razorpay_payment(user, checkout_data):
     gateway = RazorpayGateway()
     pending_payment = get_pending_payment_for_customer(user)
     if pending_payment:
+        if pending_payment.order.coupon_code != checkout_data.get('coupon_code', '').strip().upper():
+            raise ValidationError({'coupon_code': 'An earlier payment is pending with a different coupon. Use its original coupon or contact support before retrying.'})
         return pending_payment.order, pending_payment
 
     order = create_order_from_cart(user, checkout_data)
@@ -423,6 +429,14 @@ def update_refund_status_by_gateway_id(razorpay_refund_id, status, failure_reaso
 
 @transaction.atomic
 def update_seller_order_status(order, new_status):
+    from django.utils import timezone
+    order = SellerOrder.objects.select_for_update().get(pk=order.pk)
+    if order.status == 'delivered' and new_status != 'delivered':
+        raise ValidationError('A delivered shipment cannot move back to an earlier status.')
+    if order.status == 'shipped' and new_status == 'pending':
+        raise ValidationError('A dispatched shipment cannot move back to pending.')
     order.status = new_status
-    order.save(update_fields=['status'])
+    if new_status == 'delivered' and not order.delivered_at:
+        order.delivered_at = timezone.now()
+    order.save(update_fields=['status', 'delivered_at'])
     return order

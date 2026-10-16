@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    SupportTicketView,
     AddToCartView,
     CustomerAddressDetailView,
     CustomerAddressListCreateView,
@@ -9,6 +10,7 @@ from .views import (
 
 
 urlpatterns = [
+    path('support/', SupportTicketView.as_view()),
     path('profile/', CustomerProfileView.as_view(), name='customer-profile'),
     path('addresses/', CustomerAddressListCreateView.as_view(), name='customer-addresses'),
     path(
