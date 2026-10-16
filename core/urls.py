@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('health/', lambda request: JsonResponse({'status': 'ok'}), name='health-check'),
     path('admin/', admin.site.urls),
+    path('api/superadmin/', include('operations.urls')),
     path('api/auth/', include('accounts.urls')),
     path('api/customer/', include('customers.urls')),
     path('api/products/', include('products.urls')),
