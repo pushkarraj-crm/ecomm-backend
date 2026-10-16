@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+from .models import User
 import re
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
@@ -52,7 +54,7 @@ class CustomerRegisterSerializer(serializers.Serializer):
 
 
 class SellerRegisterSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all(), message='An account with this email already exists. Please sign in.')])
     password = serializers.CharField()
     business_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
     store_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
