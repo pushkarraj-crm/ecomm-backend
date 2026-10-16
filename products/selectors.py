@@ -36,7 +36,7 @@ def catalog_products():
 
 
 def get_all_products(search=None, sort=None, **filters):
-    products = catalog_products().filter(is_active=True, status='approved')
+    products = catalog_products().filter(is_active=True, status='approved', seller__is_active=True, seller__is_blacklisted=False)
     if 'category' in filters:
         products = products.filter(category_id__in=category_descendant_ids(filters['category']))
     if 'seller' in filters:
@@ -110,7 +110,7 @@ def get_seller_rating(seller):
 
 
 def get_product_detail(product_id):
-    return catalog_products().filter(id=product_id, is_active=True, status='approved').first()
+    return catalog_products().filter(id=product_id, is_active=True, status='approved', seller__is_active=True, seller__is_blacklisted=False).first()
 
 
 def get_category_tree(search=None):

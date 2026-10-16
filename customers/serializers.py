@@ -7,7 +7,7 @@ from .models import CustomerAddress, CustomerProfile
 class AddToCartSerializer(serializers.Serializer):
     variant_id = serializers.PrimaryKeyRelatedField(
         source='product_variant',
-        queryset=ProductVariant.objects.all(),
+        queryset=ProductVariant.objects.filter(product__seller__is_active=True, product__seller__is_blacklisted=False),
     )
     quantity = serializers.IntegerField(default=1, min_value=1)
 

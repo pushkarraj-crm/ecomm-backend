@@ -81,3 +81,25 @@ class SuperAdminTests(TestCase):
         self.admin.is_superuser=False
         self.admin.save()
         self.assertEqual(self.client.get(self.base+'overview/').status_code,403)
+
+    def test_seller_block_invalidates_catalog_and_prevents_cart_and_checkout(self):
+        from django.core.cache import cache
+        from products.models import ProductVariant
+        from cart.models import Cart, CartItem
+        from orders.services import create_order_from_cart
+        from rest_framework.exceptions import ValidationError
+        cache.clear()
+        product=Product.objects.create(seller=self.seller,name='Block test',description='Test',status='approved')
+        variant=ProductVariant.objects.create(product=product,size='M',color='Blue',price=100,stock=5)
+        self.assertEqual(self.client.get(f'/api/products/{product.pk}/').status_code,200)
+        self.client.force_authenticate(self.admin)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.assertEqual(self.client.patch(self.base+f'resources/sellers/{self.seller.pk}/',{'is_blacklisted':True}).status_code,200)
+        self.assertEqual(self.client.get(f'/api/products/{product.pk}/').status_code,404)
+        self.client.force_authenticate(self.customer)
+        self.assertEqual(self.client.post('/api/customer/cart/add/',{'variant_id':variant.pk,'quantity':1}).status_code,400)
+        cart=Cart.objects.create(user=self.customer)
+        CartItem.objects.create(cart=cart,product_variant=variant,quantity=1)
+        with self.assertRaises(ValidationError):
+            create_order_from_cart(self.customer,{'name':'Customer','phone':'9000000000','address':'Test'})
+        cache.clear()

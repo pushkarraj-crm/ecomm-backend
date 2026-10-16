@@ -33,7 +33,7 @@ def create_order_from_cart(user, data):
     if cart is None:
         raise ValidationError({'cart': 'Your cart is empty.'})
 
-    items = list(cart.items.select_related('product_variant__product'))
+    items = list(cart.items.select_related('product_variant__product__seller'))
     if not items:
         raise ValidationError({'cart': 'Your cart is empty.'})
     if any(
@@ -44,6 +44,9 @@ def create_order_from_cart(user, data):
             'cart': 'Every cart item must have a positive quantity and a price of at least ₹0.01.'
         })
     for item in items:
+        seller = item.product_variant.product.seller
+        if seller.is_blacklisted or not seller.is_active:
+            raise ValidationError({"cart": "A seller in your cart is unavailable. Remove their items before continuing."})
         if item.quantity > item.product_variant.stock:
             raise ValidationError({
                 'stock': (

@@ -167,7 +167,13 @@ class ResourceView(AdminView):
         queryset, read, write, search, filters, create = self.spec(resource)
         if not write:
             raise MethodNotAllowed('PATCH')
-        obj=queryset.select_for_update(of=('self',)).filter(pk=pk).first()
+        # Lock the base row, not the annotated/grouped catalog query. PostgreSQL
+        # does not allow FOR UPDATE with GROUP BY or nullable outer joins.
+        try:
+            queryset.model.objects.select_for_update().get(pk=pk)
+        except queryset.model.DoesNotExist:
+            raise Http404
+        obj=queryset.filter(pk=pk).first()
         if not obj:
             raise Http404
         return self.save(request,resource,read,write,obj)
