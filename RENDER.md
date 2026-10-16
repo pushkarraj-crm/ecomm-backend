@@ -9,3 +9,8 @@ Set NEXT_PUBLIC_API_BASE_URL and VITE_API_BASE_URL in their respective Vercel pr
 The Render start command applies migrations before starting Gunicorn. Free services do not provide a separate paid pre-deploy job. The remote database starts empty; local SQLite records and uploaded files are not transferred automatically. Seed only demo records for testing, never upload private local customer/KYC data without an explicit migration request.
 
 Razorpay and email are optional integrations requiring their own provider settings. Keep payments in provider test mode during testing. Render free instances can sleep after inactivity; the first request may need a retry while the service wakes.
+
+## Verify automatic deployments
+
+Connect the Render GitHub App to this repository and enable automatic deploys for main. After a push, confirm that Render creates a deploy for the same commit with a Git-triggered event, waits until it is live, and returns HTTP 200 from /health/ and /api/products/. A manually triggered deployment does not verify this connection.
+
