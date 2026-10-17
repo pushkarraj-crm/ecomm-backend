@@ -7,6 +7,8 @@ from customers.models import SupportTicket
 
 class SuperAdminTests(TestCase):
     def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
         users=get_user_model().objects
         self.admin=users.create_superuser('admin@example.test','strong-admin-password')
         self.customer=users.create_user('customer@example.test','strong-test-password')
@@ -103,3 +105,38 @@ class SuperAdminTests(TestCase):
         with self.assertRaises(ValidationError):
             create_order_from_cart(self.customer,{'name':'Customer','phone':'9000000000','address':'Test'})
         cache.clear()
+
+    def test_seller_detail_exposes_business_and_owned_catalog_without_credentials(self):
+        from sellers.models import SellerProfile
+        SellerProfile.objects.create(user=self.seller,business_name='Example Business',store_name='Example Store',owner_full_name='Example Owner',pickup_city='Delhi')
+        own=Product.objects.create(seller=self.seller,name='Owned product',description='Seller product',status='approved')
+        Product.objects.create(seller=self.customer,name='Unrelated product',description='Other product',status='approved')
+        self.client.force_authenticate(self.admin)
+        response=self.client.get(self.base+f'resources/sellers/{self.seller.pk}/')
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.data['business_profile']['owner_full_name'],'Example Owner')
+        self.assertEqual(response.data['business_profile']['pickup_city'],'Delhi')
+        self.assertEqual(response.data['catalog_summary']['total'],1)
+        self.assertEqual([p['id'] for p in response.data['products']],[own.pk])
+        self.assertNotIn('password',str(response.data))
+        self.assertNotIn('account_number',str(response.data))
+        filtered=self.client.get(self.base+f'resources/products/?seller={self.seller.pk}')
+        self.assertEqual([p['id'] for p in filtered.data['results']],[own.pk])
+        self.assertEqual(self.client.get(self.base+'resources/products/?seller=invalid').status_code,400)
+
+    def test_super_admin_can_add_rename_and_reparent_subcategories(self):
+        self.client.force_authenticate(self.admin)
+        url=self.base+'resources/categories/'
+        root=self.client.post(url,{'name':'Clothing'}).data
+        other=self.client.post(url,{'name':'New parent'}).data
+        response=self.client.post(url,{'name':'Shirts','parent':root['id']})
+        self.assertEqual(response.status_code,201)
+        child=response.data
+        self.assertEqual(child['parent_name'],'Clothing')
+        detail=self.client.get(url+str(root['id'])+'/').data
+        self.assertEqual(detail['subcategory_count'],1)
+        self.assertEqual(detail['children'][0]['id'],child['id'])
+        updated=self.client.patch(url+str(child['id'])+'/',{'name':'Casual shirts','parent':other['id']})
+        self.assertEqual(updated.status_code,200)
+        self.assertEqual(updated.data['name'],'Casual shirts')
+        self.assertEqual(updated.data['parent_name'],'New parent')

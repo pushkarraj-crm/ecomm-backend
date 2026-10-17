@@ -24,17 +24,28 @@ from orders.serializers import OrderSerializer
 from sellers.models import Payout, KYC
 from core.pagination import ProductPagination
 from .serializers import (UserRead, SellerWrite, CustomerWrite, ProductRead, ProductWrite,
-    CategoryWrite, BannerWrite, DeliveryWrite, CouponWrite, RequestWrite, SupportWrite, InventoryWrite)
+    CategoryWrite, BannerWrite, DeliveryWrite, CouponWrite, RequestWrite, SupportWrite, InventoryWrite, EmployeeRead, EmployeeWrite, InvitationRead, InvitationWrite)
 
 
-class IsSuperAdmin(BasePermission):
+from .models import AdminEmployee, AdminInvitation
+
+
+class IsWorkspaceAdmin(BasePermission):
     def has_permission(self, request, view):
         user = request.user
-        return bool(user.is_authenticated and user.is_active and user.is_staff and user.is_superuser and not user.is_blacklisted)
+        if not (user.is_authenticated and user.is_active and user.is_staff and not user.is_blacklisted):
+            return False
+        if user.is_superuser:
+            return True
+        if view.kwargs.get('resource') in ('employees','admin-invites'):
+            return False
+        employee = getattr(user,'admin_employee',None)
+        return bool(employee and request.auth and request.auth.get('admin_version') == employee.session_version)
+
 
 
 class AdminView(APIView):
-    permission_classes = [IsAuthenticated, IsSuperAdmin]
+    permission_classes = [IsAuthenticated, IsWorkspaceAdmin]
 
 
 class LoginView(APIView):
@@ -49,15 +60,19 @@ class LoginView(APIView):
         credentials = Credentials(data=request.data)
         credentials.is_valid(raise_exception=True)
         user = authenticate(**credentials.validated_data)
-        if not user or not user.is_staff or not user.is_superuser or not user.is_active or user.is_blacklisted:
+        employee = getattr(user,'admin_employee',None) if user else None
+        if not user or not user.is_staff or not (user.is_superuser or employee) or not user.is_active or user.is_blacklisted:
             return Response({'error': 'Invalid administrator credentials.'}, status=401)
         refresh = RefreshToken.for_user(user)
-        return Response({'access': str(refresh.access_token), 'refresh': str(refresh), 'email': user.email, 'is_superuser': True})
+        if employee and not user.is_superuser:
+            refresh['admin_version'] = employee.session_version
+        return Response({'access': str(refresh.access_token), 'refresh': str(refresh), 'email': user.email, 'is_superuser': user.is_superuser, 'is_employee': bool(employee and not user.is_superuser), 'name': employee.full_name if employee else 'Super Admin'})
 
 
 class MeView(AdminView):
     def get(self, request):
-        return Response({'email': request.user.email, 'is_superuser': True})
+        employee=getattr(request.user,'admin_employee',None)
+        return Response({'email': request.user.email, 'is_superuser': request.user.is_superuser, 'is_employee': bool(employee and not request.user.is_superuser), 'name': employee.full_name if employee else 'Super Admin'})
 
 
 class OverviewView(AdminView):
@@ -74,6 +89,7 @@ class OverviewView(AdminView):
             'net_sales': round(gross-refunds,2), 'gross_sales': round(gross,2), 'processed_refunds': refunds,
             'paid_orders': paid.count(), 'sellers': User.objects.filter(is_seller=True, is_superuser=False).count(),
             'customers': User.objects.filter(is_customer=True, is_seller=False, is_staff=False).count(),
+            'employees': AdminEmployee.objects.count() if request.user.is_superuser else None,
             'products': Product.objects.count(), 'pending_sellers': User.objects.filter(is_seller=True,seller_status='pending',is_superuser=False).count(),
             'pending_products': Product.objects.filter(status='pending').count(), 'open_support': SupportTicket.objects.filter(status='open').count(),
             'pending_requests': CustomerOrderRequest.objects.filter(status='pending').count(), 'low_stock': ProductVariant.objects.filter(stock__lte=5).count(),
@@ -84,10 +100,12 @@ class OverviewView(AdminView):
 def resources():
     # Explicit allowlists: credentials, identity documents and bank details are never serialized here.
     return {
+        'admin-invites': (AdminInvitation.objects.select_related('created_by'), InvitationRead, InvitationWrite, ['email'], ['is_active'], True),
+        'employees': (AdminEmployee.objects.select_related('user','created_by'), EmployeeRead, EmployeeWrite, ['full_name','user__email'], [], True),
         'sellers': (User.objects.filter(is_seller=True,is_superuser=False).select_related('seller_profile','customer_profile'), UserRead, SellerWrite, ['email','seller_profile__store_name'], ['seller_status','is_blacklisted'], False),
         'customers': (User.objects.filter(is_customer=True,is_seller=False,is_staff=False,is_superuser=False).select_related('seller_profile','customer_profile'), UserRead, CustomerWrite, ['email','customer_profile__name'], ['is_active'], False),
         'products': (catalog_products(), ProductRead, ProductWrite, ['name','seller__email'], ['status','is_active'], False),
-        'categories': (Category.objects.all(), CategoryWrite, CategoryWrite, ['name'], [], True),
+        'categories': (Category.objects.select_related('parent').annotate(child_count=Count('subcategories')), CategoryWrite, CategoryWrite, ['name'], [], True),
         'banners': (StoreBanner.objects.all(), BannerWrite, BannerWrite, ['title'], ['is_active'], True),
         'delivery': (DeliveryArea.objects.all(), DeliveryWrite, DeliveryWrite, ['postal_code','city'], ['is_active'], True),
         'coupons': (Coupon.objects.all(), CouponWrite, CouponWrite, ['code','seller__email'], ['is_active'], True),
@@ -132,7 +150,25 @@ class ResourceView(AdminView):
             obj = queryset.filter(pk=pk).first()
             if not obj:
                 raise Http404
-            return Response(record_data(resource,obj,read))
+            data = record_data(resource,obj,read)
+            if resource == 'categories':
+                data['children'] = CategoryWrite(Category.objects.filter(parent_id=obj.pk).select_related('parent').annotate(child_count=Count('subcategories')).order_by('name')[:100],many=True).data
+            if resource == 'sellers':
+                profile = getattr(obj, 'seller_profile', None)
+                fields = ['business_name', 'store_name', 'owner_full_name', 'business_type', 'gst_registered',
+                          'gst_number', 'gst_legal_name', 'gst_verification_status', 'is_kyc_verified',
+                          'pickup_address_line_1', 'pickup_address_line_2', 'pickup_landmark',
+                          'pickup_city', 'pickup_state', 'pickup_postal_code', 'pickup_country']
+                data['business_profile'] = {name: getattr(profile,name) for name in fields} if profile else None
+                products = catalog_products().filter(seller_id=obj.pk).order_by('-id')
+                data['catalog_summary'] = {'total': products.count(), 'approved': products.filter(status='approved').count(),
+                                           'pending': products.filter(status='pending').count(),
+                                           'shipments': SellerOrder.objects.filter(seller_id=obj.pk).count()}
+                data['products'] = ProductRead(products[:20],many=True).data
+            return Response(data)
+        if resource == 'products' and request.query_params.get('seller'):
+            seller_filter = serializers.IntegerField(min_value=1).run_validation(request.query_params['seller'])
+            queryset = queryset.filter(seller_id=seller_filter)
         search = request.query_params.get('search','').strip()
         if len(search)>100:
             raise ValidationError({'search':'Use at most 100 characters.'})
@@ -185,13 +221,59 @@ class ResourceView(AdminView):
             raise ValidationError({key:'This field cannot be edited here.' for key in unknown})
         if not request.data:
             raise ValidationError('Provide at least one editable field.')
-        serializer=write(obj,data=request.data,partial=obj is not None)
+        serializer=write(obj,data=request.data,partial=obj is not None,context={'request':request})
         serializer.is_valid(raise_exception=True)
         instance=serializer.save()
         LogEntry.objects.log_action(user_id=request.user.pk,content_type_id=ContentType.objects.get_for_model(instance).pk,
             object_id=str(instance.pk),object_repr=str(instance)[:200],action_flag=CHANGE if obj else ADDITION,
-            change_message='Updated fields: '+', '.join(sorted(serializer.validated_data)))
+            change_message='Updated fields: '+', '.join('password (reset)' if name=='password' else name for name in sorted(serializer.validated_data)))
         # Refresh annotated catalog data after approval changes.
         if resource=='products':
             instance=catalog_products().get(pk=instance.pk)
         return Response(record_data(resource,instance,read),status=200 if obj else 201)
+
+
+class SuperAdminSignupView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+    throttle_scope = 'register'
+
+    @transaction.atomic
+    def post(self,request):
+        import hashlib
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as PasswordValidationError
+        from django.db import IntegrityError
+        class SignupInput(serializers.Serializer):
+            email=serializers.EmailField()
+            password=serializers.CharField(max_length=256,trim_whitespace=False)
+            token=serializers.CharField(min_length=20,max_length=128)
+        serializer=SignupInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data=serializer.validated_data
+        invitation=AdminInvitation.objects.select_for_update().filter(token_hash=hashlib.sha256(data['token'].encode()).hexdigest()).first()
+        creator=invitation.created_by if invitation else None
+        if not invitation or invitation.used_at or not invitation.is_active or invitation.expires_at<=timezone.now() or not creator or not creator.is_active or not creator.is_staff or not creator.is_superuser or creator.is_blacklisted:
+            raise ValidationError({'token':'This invitation is invalid, expired, used or revoked. Request a new link from an existing super-admin.'})
+        email=data['email'].strip().lower()
+        if email!=invitation.email.lower():
+            raise ValidationError({'email':'Use the email address this invitation was created for.'})
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError({'email':'An account already exists for this email.'})
+        try:
+            validate_password(data['password'],user=User(email=email))
+        except PasswordValidationError as error:
+            raise ValidationError({'password':error.messages})
+        try:
+            with transaction.atomic():
+                user=User.objects.create_superuser(email=email,password=data['password'])
+                user.is_customer=False
+                user.is_seller=False
+                user.save(update_fields=['is_customer','is_seller'])
+        except IntegrityError:
+            raise ValidationError({'email':'An account already exists for this email.'})
+        invitation.used_at=timezone.now()
+        invitation.used_by=user
+        invitation.save(update_fields=['used_at','used_by'])
+        LogEntry.objects.log_action(user_id=creator.pk,content_type_id=ContentType.objects.get_for_model(user).pk,object_id=str(user.pk),object_repr=user.email,action_flag=ADDITION,change_message='Super-admin registered using a single-use invitation.')
+        return Response({'message':'Super-admin account created. You can now sign in.'},status=201)
