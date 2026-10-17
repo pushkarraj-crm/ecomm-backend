@@ -1,4 +1,6 @@
 from django.urls import path
+from .catalog_submit import SellerCatalogSubmitView
+from .image_checks import SellerImageCheckView
 from orders.views import (
     SellerDashboardAPIView,
     OrderStatusUpdateAPIView,
@@ -33,6 +35,8 @@ from .catalog import (
 urlpatterns = [
     path("orders/<int:pk>/tracking/", ShipmentTrackingView.as_view()),
     path("catalog/", SellerCatalogAPIView.as_view()),
+    path("catalog/submit/", SellerCatalogSubmitView.as_view()),
+    path("catalog/images/check/", SellerImageCheckView.as_view()),
     path("catalog/summary/", SellerCatalogSummaryAPIView.as_view()),
     path("catalog/<int:product_id>/", SellerCatalogDetailAPIView.as_view()),
     path("dashboard/", SellerDashboardAPIView.as_view()),

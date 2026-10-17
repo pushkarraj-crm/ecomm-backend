@@ -48,6 +48,7 @@ class Product(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     description = models.TextField()
     specifications = models.JSONField(default=dict, blank=True)
+    catalog_details = models.JSONField(default=dict, blank=True)
     size_guide = models.TextField(blank=True, max_length=4000)
     return_policy = models.CharField(
         max_length=24,
@@ -139,6 +140,17 @@ class ProductImage(models.Model):
         ProductVariant, on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to="products/")
+    review_status = models.CharField(
+        max_length=20,
+        default="not_required",
+        choices=[
+            ("not_required", "Legacy review"),
+            ("pending", "Pending review"),
+            ("approved", "Approved"),
+            ("rejected", "Rejected"),
+        ],
+    )
+    review_reason = models.TextField(blank=True, default="")
 
     def __str__(self):
         return f"Image for {self.variant}"

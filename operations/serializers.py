@@ -2,7 +2,14 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from rest_framework import serializers
 from accounts.models import User
 from customers.models import SupportTicket
-from products.models import Product, Category, StoreBanner, DeliveryArea, ProductVariant
+from products.models import (
+    ProductImage,
+    Product,
+    Category,
+    StoreBanner,
+    DeliveryArea,
+    ProductVariant,
+)
 from products.serializers import ProductReadSerializer
 from orders.models import Coupon, CustomerOrderRequest
 
@@ -80,6 +87,52 @@ class CustomerWrite(serializers.ModelSerializer):
         fields = ["is_active"]
 
 
+class ImageReviewRead(serializers.ModelSerializer):
+    product_id = serializers.IntegerField(source="variant.product_id", read_only=True)
+    product_name = serializers.CharField(source="variant.product.name", read_only=True)
+
+    class Meta:
+        model = ProductImage
+        fields = [
+            "id",
+            "image",
+            "product_id",
+            "product_name",
+            "review_status",
+            "review_reason",
+        ]
+
+
+class ImageReviewWrite(serializers.ModelSerializer):
+    review_status = serializers.ChoiceField(choices=["pending", "approved", "rejected"])
+
+    class Meta:
+        model = ProductImage
+        fields = ["review_status", "review_reason"]
+        extra_kwargs = {"review_reason": {"max_length": 1000}}
+
+    def validate(self, attrs):
+        status = attrs.get("review_status", self.instance.review_status)
+        if (
+            status == "rejected"
+            and not attrs.get("review_reason", self.instance.review_reason).strip()
+        ):
+            raise serializers.ValidationError(
+                {"review_reason": "Explain why this image was rejected."}
+            )
+        if status == "approved":
+            attrs["review_reason"] = ""
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        if instance.review_status != "approved":
+            product = instance.variant.product
+            product.status = "pending"
+            product.save(update_fields=["status", "updated_at"])
+        return instance
+
+
 class ProductRead(ProductReadSerializer):
     class Meta(ProductReadSerializer.Meta):
         fields = ProductReadSerializer.Meta.fields + [
@@ -90,6 +143,20 @@ class ProductRead(ProductReadSerializer):
 
 
 class ProductWrite(serializers.ModelSerializer):
+    def validate(self, attrs):
+        if (
+            attrs.get("status") == "approved"
+            and self.instance
+            and ProductImage.objects.filter(
+                variant__product=self.instance,
+                review_status__in=["pending", "rejected"],
+            ).exists()
+        ):
+            raise serializers.ValidationError(
+                {"status": "Approve all product images in Image reviews first."}
+            )
+        return attrs
+
     class Meta:
         model = Product
         fields = ["status", "is_active"]

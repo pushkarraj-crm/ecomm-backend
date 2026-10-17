@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from decimal import Decimal
+import math
+from .catalog_details import CatalogDetailsSerializer
 from .models import Category, Product, ProductVariant, ProductImage, Review
 
 
@@ -76,6 +78,7 @@ class ProductReadSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "specifications",
+            "catalog_details",
             "size_guide",
             "category",
             "return_policy",
@@ -117,7 +120,7 @@ class ProductVariantWriteSerializer(serializers.Serializer):
         return attrs
 
     def validate_price(self, value):
-        if value <= 0:
+        if not math.isfinite(value) or value <= 0:
             raise serializers.ValidationError("Price must be > 0")
         return value
 
@@ -131,6 +134,7 @@ class ProductVariantWriteSerializer(serializers.Serializer):
 # ✍️ PRODUCT (WRITE)
 # =========================
 class ProductWriteSerializer(serializers.Serializer):
+    catalog_details = CatalogDetailsSerializer(required=False, default=dict)
     specifications = serializers.DictField(
         child=serializers.CharField(max_length=500), required=False, default=dict
     )
@@ -140,7 +144,9 @@ class ProductWriteSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
-    variants = ProductVariantWriteSerializer(many=True)
+    variants = ProductVariantWriteSerializer(
+        many=True, allow_empty=False, max_length=50
+    )
     return_policy = serializers.ChoiceField(
         choices=Product.RETURN_POLICY_CHOICES,
         default="no_return",
@@ -195,6 +201,10 @@ class ProductImageUploadSerializer(serializers.Serializer):
     def validate_image(self, value):
         if value.size > 2 * 1024 * 1024:
             raise serializers.ValidationError("Image too large (max 2MB)")
+        if self.context.get("catalog_quality"):
+            from .image_quality import check_catalog_image
+
+            check_catalog_image(value)
         return value
 
 

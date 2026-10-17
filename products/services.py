@@ -10,12 +10,19 @@ class ProductService:
 
     @staticmethod
     @transaction.atomic
-    def create_product_with_variants(user, validated_data, images_by_variant):
+    def create_product_with_variants(
+        user,
+        validated_data,
+        images_by_variant,
+        uploaded_files=None,
+        require_image_review=False,
+    ):
         product = Product.objects.create(
             seller=user,
             name=validated_data["name"],
             description=validated_data["description"],
             specifications=validated_data.get("specifications", {}),
+            catalog_details=validated_data.get("catalog_details", {}),
             size_guide=validated_data.get("size_guide", ""),
             category=validated_data["category"],
             return_policy=validated_data["return_policy"],
@@ -29,7 +36,13 @@ class ProductService:
             )
 
             for image in images_by_variant[index]:
-                ProductImage.objects.create(variant=variant, image=image)
+                stored = ProductImage.objects.create(
+                    variant=variant,
+                    image=image,
+                    review_status="pending" if require_image_review else "not_required",
+                )
+                if uploaded_files is not None:
+                    uploaded_files.append(stored.image)
 
         return product
 

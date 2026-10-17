@@ -17,7 +17,14 @@ from rest_framework.exceptions import ValidationError, MethodNotAllowed
 from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.models import User
 from customers.models import SupportTicket
-from products.models import Product, Category, StoreBanner, DeliveryArea, ProductVariant
+from products.models import (
+    ProductImage,
+    Product,
+    Category,
+    StoreBanner,
+    DeliveryArea,
+    ProductVariant,
+)
 from products.selectors import catalog_products
 from orders.models import (
     Order,
@@ -34,6 +41,8 @@ from .serializers import (
     UserRead,
     SellerWrite,
     CustomerWrite,
+    ImageReviewRead,
+    ImageReviewWrite,
     ProductRead,
     ProductWrite,
     CategoryWrite,
@@ -251,6 +260,14 @@ def resources():
             CustomerWrite,
             ["email", "customer_profile__name"],
             ["is_active"],
+            False,
+        ),
+        "product-images": (
+            ProductImage.objects.select_related("variant__product"),
+            ImageReviewRead,
+            ImageReviewWrite,
+            ["variant__product__name"],
+            ["review_status"],
             False,
         ),
         "products": (

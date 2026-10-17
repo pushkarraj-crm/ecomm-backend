@@ -259,6 +259,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_THROTTLE_RATES": {
         "user": os.getenv("API_USER_RATE", "1200/hour"),
+        "image_check": os.getenv("API_IMAGE_CHECK_RATE", "60/minute"),
         "anon": os.getenv("API_ANON_RATE", "120/minute"),
         "product_tracking": os.getenv("PRODUCT_TRACKING_RATE", "1200/hour"),
         "register": os.getenv("API_REGISTER_RATE", "5/hour"),

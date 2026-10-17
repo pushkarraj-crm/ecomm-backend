@@ -118,3 +118,10 @@ class Payout(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class SellerCatalogSubmission(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
+    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    product_ids = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)

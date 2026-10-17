@@ -12,6 +12,7 @@ from core.pagination import ProductPagination
 from products.models import Category, Product
 from products.selectors import catalog_products, category_descendant_ids
 from products.serializers import ProductReadSerializer
+from products.catalog_details import CatalogDetailsSerializer
 
 
 class SellerCatalogReadSerializer(ProductReadSerializer):
@@ -32,6 +33,7 @@ class SellerCatalogQuerySerializer(serializers.Serializer):
 
 
 class SellerCatalogUpdateSerializer(serializers.ModelSerializer):
+    catalog_details = CatalogDetailsSerializer(required=False)
     specifications = serializers.DictField(
         child=serializers.CharField(max_length=500), required=False
     )
@@ -48,6 +50,7 @@ class SellerCatalogUpdateSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "specifications",
+            "catalog_details",
             "size_guide",
             "category",
             "is_active",
