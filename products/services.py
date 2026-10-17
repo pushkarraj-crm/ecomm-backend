@@ -15,7 +15,7 @@ class ProductService:
         validated_data,
         images_by_variant,
         uploaded_files=None,
-        require_image_review=False,
+        require_image_review=True,
     ):
         product = Product.objects.create(
             seller=user,

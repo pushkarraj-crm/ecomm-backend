@@ -54,7 +54,9 @@ class CreateProductView(APIView):
         for index, _ in enumerate(serializer.validated_data["variants"]):
             validated_images = []
             for image in request.FILES.getlist(f"variant_{index}_images"):
-                image_serializer = ProductImageUploadSerializer(data={"image": image})
+                image_serializer = ProductImageUploadSerializer(
+                    data={"image": image}, context={"catalog_quality": True}
+                )
                 image_serializer.is_valid(raise_exception=True)
                 validated_images.append(image_serializer.validated_data["image"])
             images_by_variant.append(validated_images)
