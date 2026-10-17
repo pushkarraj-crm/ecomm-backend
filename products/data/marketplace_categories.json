@@ -1,0 +1,2586 @@
+{
+  "source": "https://pansho.com/home/categories",
+  "captured_on": "2026-10-17",
+  "categories": [
+    {
+      "name": "Women Wear",
+      "children": [
+        {
+          "name": "Ethnic Wear",
+          "children": [
+            {
+              "name": "New Trendy Kurti",
+              "children": []
+            },
+            {
+              "name": "Salwar Suit",
+              "children": []
+            },
+            {
+              "name": "Lehenga Choli",
+              "children": []
+            },
+            {
+              "name": "Women's Blouse",
+              "children": []
+            },
+            {
+              "name": "Kurta Set",
+              "children": []
+            },
+            {
+              "name": "Scarves / Hijabs",
+              "children": []
+            },
+            {
+              "name": "Co-ord Sets",
+              "children": []
+            },
+            {
+              "name": "Other Products",
+              "children": []
+            },
+            {
+              "name": "Women's Tracksuits",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Western Wear",
+          "children": [
+            {
+              "name": "Tops & Skirts",
+              "children": []
+            },
+            {
+              "name": "T-Shirts",
+              "children": []
+            },
+            {
+              "name": "Shirts",
+              "children": []
+            },
+            {
+              "name": "Crop Tops",
+              "children": []
+            },
+            {
+              "name": "Dresses",
+              "children": []
+            },
+            {
+              "name": "Top & Bottom set",
+              "children": []
+            },
+            {
+              "name": "Blazers",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Bottom Wear",
+          "children": [
+            {
+              "name": "Jeans/Pants/Track Pants",
+              "children": []
+            },
+            {
+              "name": "Socks",
+              "children": []
+            },
+            {
+              "name": "Cargo",
+              "children": []
+            },
+            {
+              "name": "Palazzo / Leggings",
+              "children": []
+            },
+            {
+              "name": "Shorts",
+              "children": []
+            },
+            {
+              "name": "Trousers",
+              "children": []
+            },
+            {
+              "name": "Tights",
+              "children": []
+            },
+            {
+              "name": "Shape wear",
+              "children": []
+            },
+            {
+              "name": "Women Thermals Bottom",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Outer Wear",
+          "children": [
+            {
+              "name": "Jackets",
+              "children": []
+            },
+            {
+              "name": "Hoodie",
+              "children": []
+            },
+            {
+              "name": "Shawls",
+              "children": []
+            },
+            {
+              "name": "Poncho",
+              "children": []
+            },
+            {
+              "name": "Shrugs",
+              "children": []
+            },
+            {
+              "name": "Net Poncho",
+              "children": []
+            },
+            {
+              "name": "Camisole",
+              "children": []
+            },
+            {
+              "name": "Sweater",
+              "children": []
+            },
+            {
+              "name": "Women Thermals Top",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Lingerie & sleepwear",
+          "children": [
+            {
+              "name": "Women's Bras",
+              "children": []
+            },
+            {
+              "name": "Maternity Pillows",
+              "children": []
+            },
+            {
+              "name": "Women's Panties",
+              "children": []
+            },
+            {
+              "name": "Period Panty",
+              "children": []
+            },
+            {
+              "name": "Bra & Panty Set",
+              "children": []
+            },
+            {
+              "name": "Briefs & Bottomwear",
+              "children": []
+            },
+            {
+              "name": "Women Nightdress",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Sarees",
+          "children": [
+            {
+              "name": "Cotton Sarees",
+              "children": []
+            },
+            {
+              "name": "Silk Sarees",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Footwear",
+          "children": [
+            {
+              "name": "Casual Shoes",
+              "children": []
+            },
+            {
+              "name": "Sandals & Slippers",
+              "children": []
+            },
+            {
+              "name": "Boots",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mens Wear",
+      "children": [
+        {
+          "name": "Men's Ethnic Wear",
+          "children": [
+            {
+              "name": "Kurta Pajama",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Bottom Wear",
+          "children": [
+            {
+              "name": "Jeans",
+              "children": []
+            },
+            {
+              "name": "Socks",
+              "children": []
+            },
+            {
+              "name": "Formal Trousers",
+              "children": []
+            },
+            {
+              "name": "Cord-Set",
+              "children": []
+            },
+            {
+              "name": "Track Pants",
+              "children": []
+            },
+            {
+              "name": "Men's All Inner wear",
+              "children": []
+            },
+            {
+              "name": "Shorts",
+              "children": []
+            },
+            {
+              "name": "Thermal Bottoms",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Upper Wear",
+          "children": [
+            {
+              "name": "T-Shirts",
+              "children": []
+            },
+            {
+              "name": "Shirts",
+              "children": []
+            },
+            {
+              "name": "Sweater",
+              "children": []
+            },
+            {
+              "name": "Hoodie",
+              "children": []
+            },
+            {
+              "name": "Other Products",
+              "children": []
+            },
+            {
+              "name": "Men Thermals Top",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Footwear",
+          "children": [
+            {
+              "name": "Casual Shoes",
+              "children": []
+            },
+            {
+              "name": "Formal Shoes",
+              "children": []
+            },
+            {
+              "name": "Sneakers",
+              "children": []
+            },
+            {
+              "name": "Sports Shoes",
+              "children": []
+            },
+            {
+              "name": "Running Shoes",
+              "children": []
+            },
+            {
+              "name": "Loafers",
+              "children": []
+            },
+            {
+              "name": "Sandals",
+              "children": []
+            },
+            {
+              "name": "Flip Flops",
+              "children": []
+            },
+            {
+              "name": "Slippers",
+              "children": []
+            },
+            {
+              "name": "Boots",
+              "children": []
+            },
+            {
+              "name": "Ethnic Footwear",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Kids & Toys",
+      "children": [
+        {
+          "name": "Baby Care",
+          "children": [
+            {
+              "name": "Baby Soap",
+              "children": []
+            },
+            {
+              "name": "Baby Bedding & Pillows",
+              "children": []
+            },
+            {
+              "name": "Baby Shampoo",
+              "children": []
+            },
+            {
+              "name": "Baby Creams & Lotions",
+              "children": []
+            },
+            {
+              "name": "Baby Diaper",
+              "children": []
+            },
+            {
+              "name": "Baby bibs",
+              "children": []
+            },
+            {
+              "name": "Baby silicone teether",
+              "children": []
+            },
+            {
+              "name": "Baby Feeding",
+              "children": []
+            },
+            {
+              "name": "Kids Toothbrush",
+              "children": []
+            },
+            {
+              "name": "Other Baby Products",
+              "children": []
+            },
+            {
+              "name": "Kids Towels & Handkerchiefs",
+              "children": []
+            },
+            {
+              "name": "Baby Food & Fruit Feeders",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Boys Wear",
+          "children": [
+            {
+              "name": "T-Shirts",
+              "children": []
+            },
+            {
+              "name": "Shirts/Blazers",
+              "children": []
+            },
+            {
+              "name": "Cargo/Trousers",
+              "children": []
+            },
+            {
+              "name": "Winter Wear",
+              "children": []
+            },
+            {
+              "name": "Ethnic Wear",
+              "children": []
+            },
+            {
+              "name": "kids pant Shirt",
+              "children": []
+            },
+            {
+              "name": "Other Clothing",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Girls Wear",
+          "children": [
+            {
+              "name": "Dresses",
+              "children": []
+            },
+            {
+              "name": "Tops & T-Shirts",
+              "children": []
+            },
+            {
+              "name": "Skirts & Shorts",
+              "children": []
+            },
+            {
+              "name": "Trousers/Jeans/Cargo",
+              "children": []
+            },
+            {
+              "name": "Ethnic Wear",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Kids Water Bottles",
+          "children": [
+            {
+              "name": "Water Bottles",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Baby Wear",
+          "children": [
+            {
+              "name": "Rompers",
+              "children": []
+            },
+            {
+              "name": "Frocks",
+              "children": []
+            },
+            {
+              "name": "Night Wear",
+              "children": []
+            },
+            {
+              "name": "Winter Wear",
+              "children": []
+            },
+            {
+              "name": "Baby Pajamas",
+              "children": []
+            },
+            {
+              "name": "Baby Clothing Sets",
+              "children": []
+            },
+            {
+              "name": "Boys Shorts",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Kids Footwear & Socks",
+          "children": [
+            {
+              "name": "Sandals",
+              "children": []
+            },
+            {
+              "name": "Slippers / Flip-Flops",
+              "children": []
+            },
+            {
+              "name": "All Socks",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Toys & Learning",
+          "children": [
+            {
+              "name": "Learning Toys",
+              "children": []
+            },
+            {
+              "name": "All Toys",
+              "children": []
+            },
+            {
+              "name": "Educational Tools & Science Accessories",
+              "children": []
+            },
+            {
+              "name": "Teddy Bears",
+              "children": []
+            },
+            {
+              "name": "Remote Control Items",
+              "children": []
+            },
+            {
+              "name": "Musical Toys",
+              "children": []
+            },
+            {
+              "name": "Dolls",
+              "children": []
+            },
+            {
+              "name": "Art & Crafts",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Boys & Girls Innerwear",
+          "children": [
+            {
+              "name": "Boys & Girls Vests",
+              "children": []
+            },
+            {
+              "name": "Boys & Girls Briefs",
+              "children": []
+            },
+            {
+              "name": "Boys & Girls Trunks",
+              "children": []
+            },
+            {
+              "name": "Girls Camisoles",
+              "children": []
+            },
+            {
+              "name": "Boys & Girls Bloomers",
+              "children": []
+            },
+            {
+              "name": "Girls Panties",
+              "children": []
+            },
+            {
+              "name": "Thermal tops and bottoms",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Beauty & Care",
+      "children": [
+        {
+          "name": "Skin care",
+          "children": [
+            {
+              "name": "Face wash",
+              "children": []
+            },
+            {
+              "name": "Moisturizers",
+              "children": []
+            },
+            {
+              "name": "Sunscreen",
+              "children": []
+            },
+            {
+              "name": "Razor",
+              "children": []
+            },
+            {
+              "name": "Peel -of - Mask",
+              "children": []
+            },
+            {
+              "name": "Vitamins",
+              "children": []
+            },
+            {
+              "name": "Serum",
+              "children": []
+            },
+            {
+              "name": "Daily Soap",
+              "children": []
+            },
+            {
+              "name": "Toner",
+              "children": []
+            },
+            {
+              "name": "Roller",
+              "children": []
+            },
+            {
+              "name": "Charcoal Soap",
+              "children": []
+            },
+            {
+              "name": "Face Scrub",
+              "children": []
+            },
+            {
+              "name": "Lotion",
+              "children": []
+            },
+            {
+              "name": "Face Wipes",
+              "children": []
+            },
+            {
+              "name": "Other Items",
+              "children": []
+            },
+            {
+              "name": "All creams",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Hair care",
+          "children": [
+            {
+              "name": "Shampoo",
+              "children": []
+            },
+            {
+              "name": "Conditioners",
+              "children": []
+            },
+            {
+              "name": "Hair oil",
+              "children": []
+            },
+            {
+              "name": "Hair Spray",
+              "children": []
+            },
+            {
+              "name": "Hair Styling Tools",
+              "children": []
+            },
+            {
+              "name": "Herbal Products",
+              "children": []
+            },
+            {
+              "name": "Hair Towels & Wraps",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Makeup",
+          "children": [
+            {
+              "name": "Lipstick",
+              "children": []
+            },
+            {
+              "name": "Foundation",
+              "children": []
+            },
+            {
+              "name": "Facial Spray",
+              "children": []
+            },
+            {
+              "name": "Makeup Fixer",
+              "children": []
+            },
+            {
+              "name": "Eye Shadow",
+              "children": []
+            },
+            {
+              "name": "Brushe's",
+              "children": []
+            },
+            {
+              "name": "Lip Liner",
+              "children": []
+            },
+            {
+              "name": "All Makeup",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Body Wax",
+          "children": [
+            {
+              "name": "Hard Wax Beans",
+              "children": []
+            },
+            {
+              "name": "All Types of Wax Cream",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Fragrances",
+          "children": [
+            {
+              "name": "Perfume",
+              "children": []
+            },
+            {
+              "name": "Deodorant",
+              "children": []
+            },
+            {
+              "name": "Body Mist",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Oral Care",
+          "children": [
+            {
+              "name": "Herbal Products",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Accessories",
+      "children": [
+        {
+          "name": "Mobiles & Accessories",
+          "children": [
+            {
+              "name": "Mobile covers",
+              "children": []
+            },
+            {
+              "name": "Charger Cable & protector",
+              "children": []
+            },
+            {
+              "name": "Screen Guards",
+              "children": []
+            },
+            {
+              "name": "Mobile Phone Holders",
+              "children": []
+            },
+            {
+              "name": "Power Banks",
+              "children": []
+            },
+            {
+              "name": "Other Items",
+              "children": []
+            },
+            {
+              "name": "Mobile Chargers & Adapters",
+              "children": []
+            },
+            {
+              "name": "Ring Lights & Mobile Lighting",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Computer Accessories",
+          "children": [
+            {
+              "name": "Laptop Stand",
+              "children": []
+            },
+            {
+              "name": "Mouse Pad",
+              "children": []
+            },
+            {
+              "name": "Keyboard Protectors",
+              "children": []
+            },
+            {
+              "name": "Screen cleaning set",
+              "children": []
+            },
+            {
+              "name": "Laptop Cable Protectors",
+              "children": []
+            },
+            {
+              "name": "USB Flash Drives",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Contact lenses",
+          "children": [
+            {
+              "name": "Blue lens",
+              "children": []
+            },
+            {
+              "name": "Green lens",
+              "children": []
+            },
+            {
+              "name": "Black lens",
+              "children": []
+            },
+            {
+              "name": "Grey lens",
+              "children": []
+            },
+            {
+              "name": "Hazel",
+              "children": []
+            },
+            {
+              "name": "Brown lens",
+              "children": []
+            },
+            {
+              "name": "Lens solution",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Audio Device's",
+          "children": [
+            {
+              "name": "Headphones & Earphones",
+              "children": []
+            },
+            {
+              "name": "Microphones & Audio Accessories",
+              "children": []
+            },
+            {
+              "name": "Bluetooth Speakers & Portable Audio",
+              "children": []
+            },
+            {
+              "name": "Earbuds",
+              "children": []
+            },
+            {
+              "name": "Megaphones & Voice Amplifiers",
+              "children": []
+            },
+            {
+              "name": "Vlogging Tools",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Jewellery",
+          "children": [
+            {
+              "name": "Jewellery Sets",
+              "children": []
+            },
+            {
+              "name": "Earrings",
+              "children": []
+            },
+            {
+              "name": "Mangalsutras",
+              "children": []
+            },
+            {
+              "name": "Rings",
+              "children": []
+            },
+            {
+              "name": "Necklaces & Chains",
+              "children": []
+            },
+            {
+              "name": "Bangles & Bracelets",
+              "children": []
+            },
+            {
+              "name": "Anklets & Nose Pins",
+              "children": []
+            },
+            {
+              "name": "Kamarbandh & Maang Tika",
+              "children": []
+            },
+            {
+              "name": "Other Jewellery",
+              "children": []
+            },
+            {
+              "name": "Pendant / Locket",
+              "children": []
+            },
+            {
+              "name": "Rudraksha & Spiritual Jewellery",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Furniture Wheels",
+          "children": [
+            {
+              "name": "All furniture wheels",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Car & Bike Accessories",
+          "children": [
+            {
+              "name": "Foot Rest",
+              "children": []
+            },
+            {
+              "name": "Car Neck Pillow",
+              "children": []
+            },
+            {
+              "name": "Vehicle Indicators",
+              "children": []
+            },
+            {
+              "name": "Car Exterior & Interior Accessories",
+              "children": []
+            },
+            {
+              "name": "Car & Bike Body Covers",
+              "children": []
+            },
+            {
+              "name": "Car Cushion",
+              "children": []
+            },
+            {
+              "name": "Car Keychains & Key Rings",
+              "children": []
+            },
+            {
+              "name": "Car & Bike Mobile Holders & Mounts",
+              "children": []
+            },
+            {
+              "name": "Car Perfumes & Air Fresheners",
+              "children": []
+            },
+            {
+              "name": "Other Items",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Safety Items",
+          "children": [
+            {
+              "name": "Safety Gloves",
+              "children": []
+            },
+            {
+              "name": "All Safety Items",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Men's Accessories",
+          "children": [
+            {
+              "name": "Leather Belts",
+              "children": []
+            },
+            {
+              "name": "Wallets",
+              "children": []
+            },
+            {
+              "name": "Casual Belts",
+              "children": []
+            },
+            {
+              "name": "Card Holder",
+              "children": []
+            },
+            {
+              "name": "Bandana Mask",
+              "children": []
+            },
+            {
+              "name": "Bracelets",
+              "children": []
+            },
+            {
+              "name": "Other Products",
+              "children": []
+            },
+            {
+              "name": "Men's Towels & Gamcha",
+              "children": []
+            },
+            {
+              "name": "Other Items",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Pooja & Spiritual",
+          "children": [
+            {
+              "name": "Jadibooti & Spiritual Herbs",
+              "children": []
+            },
+            {
+              "name": "God Idols & Pooja Items",
+              "children": []
+            },
+            {
+              "name": "Incense Sticks & Agarbatti",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Watches",
+          "children": [
+            {
+              "name": "Analog Watches",
+              "children": []
+            },
+            {
+              "name": "Watch Box",
+              "children": []
+            },
+            {
+              "name": "Digital Watches",
+              "children": []
+            },
+            {
+              "name": "Luxury Watches",
+              "children": []
+            },
+            {
+              "name": "Smart Watches & Fitness Bands",
+              "children": []
+            },
+            {
+              "name": "Watch Accessories",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Grooming Accessories",
+          "children": [
+            {
+              "name": "Beard Trimmer",
+              "children": []
+            },
+            {
+              "name": "Nail Cutters",
+              "children": []
+            },
+            {
+              "name": "Foot scruber",
+              "children": []
+            },
+            {
+              "name": "Shaving Items",
+              "children": []
+            },
+            {
+              "name": "Blackhead Removal",
+              "children": []
+            },
+            {
+              "name": "Beard Comb & Brush",
+              "children": []
+            },
+            {
+              "name": "All Itmes",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Fashion",
+          "children": [
+            {
+              "name": "Chains",
+              "children": []
+            },
+            {
+              "name": "Sunglasses",
+              "children": []
+            },
+            {
+              "name": "Saree Belts",
+              "children": []
+            },
+            {
+              "name": "Umbrellas",
+              "children": []
+            },
+            {
+              "name": "Rings",
+              "children": []
+            },
+            {
+              "name": "Caps",
+              "children": []
+            },
+            {
+              "name": "Handkerchiefs & Scarves",
+              "children": []
+            },
+            {
+              "name": "Winter Accessories",
+              "children": []
+            },
+            {
+              "name": "Kadas",
+              "children": []
+            },
+            {
+              "name": "Raincoats for Men & Women",
+              "children": []
+            },
+            {
+              "name": "Embroidered Patches",
+              "children": []
+            },
+            {
+              "name": "Keychains & Key Rings",
+              "children": []
+            },
+            {
+              "name": "Other Fashion",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Camera & Photography",
+          "children": [
+            {
+              "name": "Tripods & Camera Stands",
+              "children": []
+            },
+            {
+              "name": "Action Cameras & Camcorders",
+              "children": []
+            },
+            {
+              "name": "CCTV & IP Cameras",
+              "children": []
+            },
+            {
+              "name": "Vlogging Kits & Accessories",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Fabric",
+          "children": [
+            {
+              "name": "All Types of Fabric",
+              "children": []
+            },
+            {
+              "name": "Other Products",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Hair Accessories",
+          "children": [
+            {
+              "name": "Hair Clips",
+              "children": []
+            },
+            {
+              "name": "Hair Bands",
+              "children": []
+            },
+            {
+              "name": "Hair Pins",
+              "children": []
+            },
+            {
+              "name": "Scrunchie's",
+              "children": []
+            },
+            {
+              "name": "Caps",
+              "children": []
+            },
+            {
+              "name": "Hair Brushes",
+              "children": []
+            },
+            {
+              "name": "Combo hair accessories",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Water Accessories",
+          "children": [
+            {
+              "name": "Overflow Alarm",
+              "children": []
+            },
+            {
+              "name": "Multiple Purpose Pipes",
+              "children": []
+            },
+            {
+              "name": "Water Hoses",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Electronics & Accessories",
+          "children": [
+            {
+              "name": "Wireless Display Adapters & TV Accessories",
+              "children": []
+            },
+            {
+              "name": "Extension Boards & Power Strips",
+              "children": []
+            },
+            {
+              "name": "All Type Adapters",
+              "children": []
+            },
+            {
+              "name": "Other Items",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Tools & Hardware",
+          "children": [
+            {
+              "name": "Tool Kits",
+              "children": []
+            },
+            {
+              "name": "Spare Parts",
+              "children": []
+            },
+            {
+              "name": "Other Products",
+              "children": []
+            },
+            {
+              "name": "Electronic Products",
+              "children": []
+            },
+            {
+              "name": "Welding Machines",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Home & Kitchen",
+      "children": [
+        {
+          "name": "Storage & Organizers",
+          "children": [
+            {
+              "name": "Kitchen Containers",
+              "children": []
+            },
+            {
+              "name": "Storage Jars",
+              "children": []
+            },
+            {
+              "name": "Spice Containers & Masala Boxes",
+              "children": []
+            },
+            {
+              "name": "Storage Bags & Boxes",
+              "children": []
+            },
+            {
+              "name": "Fruit & Vegetable Baskets",
+              "children": []
+            },
+            {
+              "name": "Dish Racks",
+              "children": []
+            },
+            {
+              "name": "Hooks & Holder",
+              "children": []
+            },
+            {
+              "name": "Kitchen Rack",
+              "children": []
+            },
+            {
+              "name": "Kitchen Racks & Shelves",
+              "children": []
+            },
+            {
+              "name": "Kitchen Trolleys",
+              "children": []
+            },
+            {
+              "name": "Glass Holders",
+              "children": []
+            },
+            {
+              "name": "Cutlery Organizers",
+              "children": []
+            },
+            {
+              "name": "Hooks & Holders",
+              "children": []
+            },
+            {
+              "name": "Tissue Holders",
+              "children": []
+            },
+            {
+              "name": "Sink Organizers",
+              "children": []
+            },
+            {
+              "name": "Cabinet Organizers",
+              "children": []
+            },
+            {
+              "name": "Cylinder Trolleys",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Kitchen Tools & Accessories",
+          "children": [
+            {
+              "name": "Vegetable Choppers",
+              "children": []
+            },
+            {
+              "name": "Kitchen Knives",
+              "children": []
+            },
+            {
+              "name": "Peelers",
+              "children": []
+            },
+            {
+              "name": "Graters",
+              "children": []
+            },
+            {
+              "name": "Ladles & Kitchen Spoons",
+              "children": []
+            },
+            {
+              "name": "Lemon Squeezers",
+              "children": []
+            },
+            {
+              "name": "Whisks",
+              "children": []
+            },
+            {
+              "name": "Tongs",
+              "children": []
+            },
+            {
+              "name": "Spatulas",
+              "children": []
+            },
+            {
+              "name": "Measuring Cups & Spoons",
+              "children": []
+            },
+            {
+              "name": "Chopping Boards",
+              "children": []
+            },
+            {
+              "name": "Other Products",
+              "children": []
+            },
+            {
+              "name": "Kitchen Tool Sets",
+              "children": []
+            },
+            {
+              "name": "Pizza Cutters",
+              "children": []
+            },
+            {
+              "name": "Funnels",
+              "children": []
+            },
+            {
+              "name": "Strainers & Sieves",
+              "children": []
+            },
+            {
+              "name": "Bottle & Can Openers",
+              "children": []
+            },
+            {
+              "name": "Kitchen Scissors",
+              "children": []
+            },
+            {
+              "name": "Rolling Pins",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Tableware & Dining",
+          "children": [
+            {
+              "name": "Dinner Plates",
+              "children": []
+            },
+            {
+              "name": "Bowls",
+              "children": []
+            },
+            {
+              "name": "Dinner Sets",
+              "children": []
+            },
+            {
+              "name": "Spoons, Forks & Cutlery",
+              "children": []
+            },
+            {
+              "name": "Serving Dishes & Bowls",
+              "children": []
+            },
+            {
+              "name": "Serving Trays & Platters",
+              "children": []
+            },
+            {
+              "name": "Wooden Plates & Platters",
+              "children": []
+            },
+            {
+              "name": "Salt & Pepper Shakers",
+              "children": []
+            },
+            {
+              "name": "Condiment Holders",
+              "children": []
+            },
+            {
+              "name": "Cake Stands & Serving Stands",
+              "children": []
+            },
+            {
+              "name": "Fruit & Snack Trays",
+              "children": []
+            },
+            {
+              "name": "Other Tableware & Dining",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Cleaning Essentials",
+          "children": [
+            {
+              "name": "Cleaning Brushes",
+              "children": []
+            },
+            {
+              "name": "Scrubbers & Scouring Pads",
+              "children": []
+            },
+            {
+              "name": "Floor Mops",
+              "children": []
+            },
+            {
+              "name": "Brooms",
+              "children": []
+            },
+            {
+              "name": "Dustpans",
+              "children": []
+            },
+            {
+              "name": "Cleaning Cloths",
+              "children": []
+            },
+            {
+              "name": "Dusters",
+              "children": []
+            },
+            {
+              "name": "Vacuum Cleaners",
+              "children": []
+            },
+            {
+              "name": "Electric Cleaning Brushes",
+              "children": []
+            },
+            {
+              "name": "Cleaning Tools & Accessories",
+              "children": []
+            },
+            {
+              "name": "Dustbins",
+              "children": []
+            },
+            {
+              "name": "Laundry Baskets",
+              "children": []
+            },
+            {
+              "name": "Clothes Drying Racks",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Lunch Boxes",
+          "children": [
+            {
+              "name": "Plastic Lunch Boxes",
+              "children": []
+            },
+            {
+              "name": "Stainless Steel Lunch Boxes",
+              "children": []
+            },
+            {
+              "name": "Insulated Lunch Boxes",
+              "children": []
+            },
+            {
+              "name": "Compartment Lunch Boxes",
+              "children": []
+            },
+            {
+              "name": "Kids Lunch Boxes",
+              "children": []
+            },
+            {
+              "name": "Office Lunch Boxes",
+              "children": []
+            },
+            {
+              "name": "Tiffin Boxes",
+              "children": []
+            },
+            {
+              "name": "Other Products",
+              "children": []
+            },
+            {
+              "name": "Electric Lunch Boxes",
+              "children": []
+            },
+            {
+              "name": "Lunch Bags",
+              "children": []
+            },
+            {
+              "name": "Food Carriers",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Water Bottles",
+          "children": [
+            {
+              "name": "Stainless Steel Bottles",
+              "children": []
+            },
+            {
+              "name": "Plastic Water Bottles",
+              "children": []
+            },
+            {
+              "name": "Sippers",
+              "children": []
+            },
+            {
+              "name": "Copper Bottles",
+              "children": []
+            },
+            {
+              "name": "Glass Water Bottles",
+              "children": []
+            },
+            {
+              "name": "Insulated Bottles",
+              "children": []
+            },
+            {
+              "name": "Kids Water Bottles",
+              "children": []
+            },
+            {
+              "name": "Sports Water Bottles",
+              "children": []
+            },
+            {
+              "name": "Thermos Flasks",
+              "children": []
+            },
+            {
+              "name": "All Bottles",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Water Purifiers & Accessories",
+          "children": [
+            {
+              "name": "RO Water Purifiers",
+              "children": []
+            },
+            {
+              "name": "UV Water Purifiers",
+              "children": []
+            },
+            {
+              "name": "Gravity Water Purifiers",
+              "children": []
+            },
+            {
+              "name": "Water Filter Systems",
+              "children": []
+            },
+            {
+              "name": "Filter Cartridges",
+              "children": []
+            },
+            {
+              "name": "RO Membranes",
+              "children": []
+            },
+            {
+              "name": "Filter Candles",
+              "children": []
+            },
+            {
+              "name": "Water Purifier Parts",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Mug & Glasses",
+          "children": [
+            {
+              "name": "Coffee Mugs",
+              "children": []
+            },
+            {
+              "name": "Tea Cups",
+              "children": []
+            },
+            {
+              "name": "Glass Tumblers",
+              "children": []
+            },
+            {
+              "name": "Drinking Glass Sets",
+              "children": []
+            },
+            {
+              "name": "Travel Mugs",
+              "children": []
+            },
+            {
+              "name": "Cup & Saucer Sets",
+              "children": []
+            },
+            {
+              "name": "Mug & Glasses",
+              "children": []
+            },
+            {
+              "name": "Water Glasses",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Food & Pantry",
+          "children": [
+            {
+              "name": "Cashews",
+              "children": []
+            },
+            {
+              "name": "Almonds",
+              "children": []
+            },
+            {
+              "name": "Pistachios",
+              "children": []
+            },
+            {
+              "name": "Walnuts",
+              "children": []
+            },
+            {
+              "name": "Mixed Dry Fruits",
+              "children": []
+            },
+            {
+              "name": "Chia Seeds",
+              "children": []
+            },
+            {
+              "name": "Pumpkin Seeds",
+              "children": []
+            },
+            {
+              "name": "Sunflower Seeds",
+              "children": []
+            },
+            {
+              "name": "Whole Spices",
+              "children": []
+            },
+            {
+              "name": "Ground Spices",
+              "children": []
+            },
+            {
+              "name": "Masala Blends",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Table Mats & Covers",
+          "children": [
+            {
+              "name": "Table Mats",
+              "children": []
+            },
+            {
+              "name": "Table Covers",
+              "children": []
+            },
+            {
+              "name": "Table Runners",
+              "children": []
+            },
+            {
+              "name": "Placemats",
+              "children": []
+            },
+            {
+              "name": "Coasters",
+              "children": []
+            },
+            {
+              "name": "Dining Napkins",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Bathroom & Linen Accessories",
+          "children": [
+            {
+              "name": "Bathroom brushes",
+              "children": []
+            },
+            {
+              "name": "Soap Holders & Dispensers",
+              "children": []
+            },
+            {
+              "name": "Toothbrush Holders",
+              "children": []
+            },
+            {
+              "name": "Bathroom Shelves",
+              "children": []
+            },
+            {
+              "name": "Bathroom Organizers",
+              "children": []
+            },
+            {
+              "name": "Bath Towels",
+              "children": []
+            },
+            {
+              "name": "Hand Towels",
+              "children": []
+            },
+            {
+              "name": "Face Towels",
+              "children": []
+            },
+            {
+              "name": "Bath Mats",
+              "children": []
+            },
+            {
+              "name": "Shower Curtains",
+              "children": []
+            },
+            {
+              "name": "Bathrobes",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Pest Control",
+          "children": [
+            {
+              "name": "Mosquito Killer Rackets",
+              "children": []
+            },
+            {
+              "name": "Electric Insect Killers",
+              "children": []
+            },
+            {
+              "name": "Mosquito Repellents",
+              "children": []
+            },
+            {
+              "name": "Insect Traps",
+              "children": []
+            },
+            {
+              "name": "Pest Control Accessories",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Cookware",
+          "children": [
+            {
+              "name": "Kadai",
+              "children": []
+            },
+            {
+              "name": "Kitchen Knives",
+              "children": []
+            },
+            {
+              "name": "Tawa",
+              "children": []
+            },
+            {
+              "name": "Frying Pans",
+              "children": []
+            },
+            {
+              "name": "Sauce Pans",
+              "children": []
+            },
+            {
+              "name": "Cooking Pots",
+              "children": []
+            },
+            {
+              "name": "Pressure Cookers",
+              "children": []
+            },
+            {
+              "name": "Handi",
+              "children": []
+            },
+            {
+              "name": "Milk Pans",
+              "children": []
+            },
+            {
+              "name": "Cookware Sets",
+              "children": []
+            },
+            {
+              "name": "Non-Stick Cookware",
+              "children": []
+            },
+            {
+              "name": "Induction Cookware",
+              "children": []
+            },
+            {
+              "name": "Cast Iron Cookware",
+              "children": []
+            },
+            {
+              "name": "Steamers & Idli Makers",
+              "children": []
+            },
+            {
+              "name": "Baking Trays",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Kitchen Appliances",
+          "children": [
+            {
+              "name": "Mixer Grinders",
+              "children": []
+            },
+            {
+              "name": "Hand Blenders",
+              "children": []
+            },
+            {
+              "name": "Electric Choppers",
+              "children": []
+            },
+            {
+              "name": "Food Processors",
+              "children": []
+            },
+            {
+              "name": "Juicers",
+              "children": []
+            },
+            {
+              "name": "Electric Kettles",
+              "children": []
+            },
+            {
+              "name": "Rice Cookers",
+              "children": []
+            },
+            {
+              "name": "Air Fryers",
+              "children": []
+            },
+            {
+              "name": "Toasters",
+              "children": []
+            },
+            {
+              "name": "Sandwich Makers",
+              "children": []
+            },
+            {
+              "name": "Induction Cooktops",
+              "children": []
+            },
+            {
+              "name": "Coffee Makers",
+              "children": []
+            },
+            {
+              "name": "Egg Boilers",
+              "children": []
+            },
+            {
+              "name": "Electric Beaters",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Diwali",
+      "children": [
+        {
+          "name": "Diwali Decorative Items",
+          "children": [
+            {
+              "name": "Diwali Candles & Diya's",
+              "children": []
+            },
+            {
+              "name": "LED Lights",
+              "children": []
+            },
+            {
+              "name": "Decoration Light",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Showpieces & Decor Items",
+          "children": [
+            {
+              "name": "Bedsheets & Curtains",
+              "children": []
+            },
+            {
+              "name": "Table Showpieces",
+              "children": []
+            },
+            {
+              "name": "Idols & Statues",
+              "children": []
+            },
+            {
+              "name": "Decorative Articles",
+              "children": []
+            },
+            {
+              "name": "Handicraft Items",
+              "children": []
+            },
+            {
+              "name": "Other Product",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Artificial Flowers & Plants",
+          "children": [
+            {
+              "name": "Artificial Plants",
+              "children": []
+            },
+            {
+              "name": "Flower Pots",
+              "children": []
+            },
+            {
+              "name": "Vases",
+              "children": []
+            },
+            {
+              "name": "Hanging Plants",
+              "children": []
+            },
+            {
+              "name": "Plant Grow Bags",
+              "children": []
+            },
+            {
+              "name": "Plant seeds",
+              "children": []
+            },
+            {
+              "name": "Gardening Tools",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Mirrors & Reflective Decor",
+          "children": [
+            {
+              "name": "Decorative Mirrors",
+              "children": []
+            },
+            {
+              "name": "Wall Mirrors",
+              "children": []
+            },
+            {
+              "name": "Table Mirrors",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Party Celebration",
+          "children": [
+            {
+              "name": "Party Supplies",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Eco-Friendly Decor",
+          "children": [
+            {
+              "name": "Bamboo Decor Items",
+              "children": []
+            },
+            {
+              "name": "Jute Wall Decor",
+              "children": []
+            },
+            {
+              "name": "Recycled Material Decor",
+              "children": []
+            },
+            {
+              "name": "Aroma Oils",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Home Furniture",
+          "children": [
+            {
+              "name": "Bean Bag",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Wall Decor",
+          "children": [
+            {
+              "name": "Wall Frames",
+              "children": []
+            },
+            {
+              "name": "Wall Paintings & Wall Art",
+              "children": []
+            },
+            {
+              "name": "Wall Stickers",
+              "children": []
+            },
+            {
+              "name": "Wallpaper",
+              "children": []
+            },
+            {
+              "name": "Wall Hangings",
+              "children": []
+            },
+            {
+              "name": "Wall Clocks",
+              "children": []
+            },
+            {
+              "name": "Photo Frames",
+              "children": []
+            },
+            {
+              "name": "2 Way Wall Indoor Outdoor Nets",
+              "children": []
+            },
+            {
+              "name": "Decoration Leaves",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Stationery & Office",
+      "children": [
+        {
+          "name": "School Stationery",
+          "children": [
+            {
+              "name": "Notebooks",
+              "children": []
+            },
+            {
+              "name": "Other Items",
+              "children": []
+            },
+            {
+              "name": "Drawing Books",
+              "children": []
+            },
+            {
+              "name": "Envelopes",
+              "children": []
+            },
+            {
+              "name": "Exam Pads",
+              "children": []
+            },
+            {
+              "name": "Correction Tape",
+              "children": []
+            },
+            {
+              "name": "School Registers",
+              "children": []
+            },
+            {
+              "name": "Pencil Boxes",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Writing Instruments",
+          "children": [
+            {
+              "name": "All Pens & Pencils",
+              "children": []
+            },
+            {
+              "name": "Writing Tablets",
+              "children": []
+            },
+            {
+              "name": "Highlighters",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Kids Stationery",
+          "children": [
+            {
+              "name": "Cartoon Pencils",
+              "children": []
+            },
+            {
+              "name": "Crayons",
+              "children": []
+            },
+            {
+              "name": "Colored Pencils",
+              "children": []
+            },
+            {
+              "name": "Water Colours",
+              "children": []
+            },
+            {
+              "name": "All stationary Items",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Office Stationery",
+          "children": [
+            {
+              "name": "Markers",
+              "children": []
+            },
+            {
+              "name": "Pen Holders",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Stationery Organizer",
+          "children": [
+            {
+              "name": "Cheque Book Holders",
+              "children": []
+            },
+            {
+              "name": "Keychains",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Books",
+          "children": [
+            {
+              "name": "Novels",
+              "children": []
+            },
+            {
+              "name": "Dictionary",
+              "children": []
+            },
+            {
+              "name": "General Books",
+              "children": []
+            },
+            {
+              "name": "Meditation",
+              "children": []
+            },
+            {
+              "name": "Mathematics",
+              "children": []
+            },
+            {
+              "name": "Ayurveda",
+              "children": []
+            },
+            {
+              "name": "Motivational Books",
+              "children": []
+            },
+            {
+              "name": "History",
+              "children": []
+            },
+            {
+              "name": "Kid's Books",
+              "children": []
+            },
+            {
+              "name": "Astrology",
+              "children": []
+            },
+            {
+              "name": "Yoga",
+              "children": []
+            },
+            {
+              "name": "Competition Books",
+              "children": []
+            },
+            {
+              "name": "Other Books",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bags",
+      "children": [
+        {
+          "name": "School Bags",
+          "children": [
+            {
+              "name": "Kids School Bags",
+              "children": []
+            },
+            {
+              "name": "Cartoon School Bags",
+              "children": []
+            },
+            {
+              "name": "Lightweight School Bags",
+              "children": []
+            },
+            {
+              "name": "Single Compartment Bags",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Travel Bags & Gym Bags",
+          "children": [
+            {
+              "name": "Duffel Bags",
+              "children": []
+            },
+            {
+              "name": "Rolling & Trolley Travel Bags",
+              "children": []
+            },
+            {
+              "name": "Hand Carry Travel Bags",
+              "children": []
+            },
+            {
+              "name": "Detachable Trolley Bags",
+              "children": []
+            },
+            {
+              "name": "All Gym Bags",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Office Bags",
+          "children": [
+            {
+              "name": "Formal Office Backpacks",
+              "children": []
+            },
+            {
+              "name": "Document Carry Bags",
+              "children": []
+            },
+            {
+              "name": "File Carry Bags",
+              "children": []
+            },
+            {
+              "name": "Office Sling Bags",
+              "children": []
+            },
+            {
+              "name": "Waterproof Office Backpacks",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Laptop Bags",
+          "children": [
+            {
+              "name": "Laptop Bags & Backpacks",
+              "children": []
+            },
+            {
+              "name": "Multi-Compartment Laptop Backpacks",
+              "children": []
+            },
+            {
+              "name": "Waterproof Laptop Backpacks",
+              "children": []
+            },
+            {
+              "name": "Formal Laptop Bags",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Women's Bags",
+          "children": [
+            {
+              "name": "Casual Handbags",
+              "children": []
+            },
+            {
+              "name": "Party Handbags",
+              "children": []
+            },
+            {
+              "name": "Sling Bags",
+              "children": []
+            },
+            {
+              "name": "Backpack",
+              "children": []
+            },
+            {
+              "name": "Classic Shoulder Bags",
+              "children": []
+            },
+            {
+              "name": "Shopping Tote Bags",
+              "children": []
+            },
+            {
+              "name": "Pouch Bags",
+              "children": []
+            },
+            {
+              "name": "Cosmetic Bags",
+              "children": []
+            },
+            {
+              "name": "Wedding Clutches",
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Storage & Organizer Bags",
+          "children": [
+            {
+              "name": "Large Canvas Storage Bags",
+              "children": []
+            },
+            {
+              "name": "Shopping Tote Bags",
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Footwear",
+      "children": [
+        {
+          "name": "Casual Shoes",
+          "children": []
+        },
+        {
+          "name": "Sandals & Slippers",
+          "children": []
+        },
+        {
+          "name": "Boots",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "Pet World",
+      "children": []
+    },
+    {
+      "name": "Health & Care",
+      "children": []
+    },
+    {
+      "name": "Sports",
+      "children": []
+    }
+  ]
+}
