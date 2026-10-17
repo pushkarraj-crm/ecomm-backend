@@ -35,6 +35,20 @@ class MarketplaceCatalogTests(TestCase):
         self.assertIsInstance(self.client.get('/api/products/').data, list)
         self.assertEqual([p['id'] for p in self.results(category=self.parent.pk)], [self.product.pk])
 
+    def test_multiple_category_branches_include_descendants_without_duplicates(self):
+        second = Category.objects.create(name='Home')
+        self.other.category = second
+        self.other.save()
+        cache.clear()
+        result = self.results(category_ids=f'{self.parent.pk},{second.pk}')
+        self.assertEqual({row['id'] for row in result}, {self.product.pk, self.other.pk})
+        result = self.results(category_ids=f'{self.parent.pk},{self.child.pk}')
+        self.assertEqual([row['id'] for row in result], [self.product.pk])
+        result = self.results(category_ids=str(self.child.pk), color='Blue', max_price=250)
+        self.assertEqual([row['id'] for row in result], [self.product.pk])
+        for value in ['', 'abc', '0', '1,-2', ',1', ','.join(['1']*1001)]:
+            self.assertEqual(self.client.get('/api/products/', {'category_ids':value}).status_code, 400)
+
     def test_variant_constraints_match_one_stocked_variant(self):
         self.assertEqual(self.results(size='M', color='Red'), [])
         self.assertEqual(self.results(color='Red', max_price='250'), [])

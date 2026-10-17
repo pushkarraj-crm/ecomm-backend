@@ -15,7 +15,7 @@ PRODUCT_SORT_OPTIONS = {
 
 def category_descendant_ids(category_id):
     rows = list(Category.objects.values_list('id', 'parent_id'))
-    included = {category_id}
+    included = set(category_id) if isinstance(category_id, (list, tuple, set)) else {category_id}
     while True:
         children = {pk for pk, parent in rows if parent in included}
         if children <= included:
@@ -37,7 +37,9 @@ def catalog_products():
 
 def get_all_products(search=None, sort=None, **filters):
     products = catalog_products().filter(is_active=True, status='approved', seller__is_active=True, seller__is_blacklisted=False)
-    if 'category' in filters:
+    if 'category_ids' in filters:
+        products = products.filter(category_id__in=category_descendant_ids(filters['category_ids']))
+    elif 'category' in filters:
         products = products.filter(category_id__in=category_descendant_ids(filters['category']))
     if 'seller' in filters:
         products = products.filter(seller_id=filters['seller'])

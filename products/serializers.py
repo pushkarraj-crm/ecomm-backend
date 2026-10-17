@@ -146,8 +146,16 @@ class ProductImageUploadSerializer(serializers.Serializer):
         return value
 
 
+class CategoryIdsField(serializers.ListField):
+    def to_internal_value(self, data):
+        if isinstance(data, str):
+            data = data.split(',')
+        return super().to_internal_value(data)
+
+
 class CatalogFilterSerializer(serializers.Serializer):
     category = serializers.IntegerField(min_value=1, required=False)
+    category_ids = CategoryIdsField(child=serializers.IntegerField(min_value=1), max_length=1000, allow_empty=False, required=False)
     seller = serializers.IntegerField(min_value=1, required=False)
     min_price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0'), required=False)
     max_price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0'), required=False)
