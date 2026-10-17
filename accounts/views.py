@@ -18,7 +18,7 @@ from .services import UserService
 
 
 class RegisterCustomerView(APIView):
-    throttle_scope = 'register'
+    throttle_scope = "register"
 
     def post(self, request):
         serializer = CustomerRegisterSerializer(data=request.data)
@@ -28,7 +28,7 @@ class RegisterCustomerView(APIView):
 
 
 class RegisterSellerView(APIView):
-    throttle_scope = 'register'
+    throttle_scope = "register"
 
     def post(self, request):
         serializer = SellerRegisterSerializer(data=request.data)
@@ -38,7 +38,7 @@ class RegisterSellerView(APIView):
 
 
 class LoginView(APIView):
-    throttle_scope = 'login'
+    throttle_scope = "login"
     serializer_class = LoginSerializer
 
     def post(self, request):
@@ -46,18 +46,22 @@ class LoginView(APIView):
         if not serializer.is_valid():
             return Response({"error": "Invalid credentials"}, status=400)
 
-        user = serializer.validated_data['user']
+        user = serializer.validated_data["user"]
         refresh = RefreshToken.for_user(user)
 
-        profile = getattr(user, "customer_profile", None) if not user.is_seller else None
-        return Response({
-            "name": profile.name if profile else "",
-            "mobile_number": profile.mobile_number if profile else "",
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-            "is_seller": user.is_seller,
-            "seller_status": user.seller_status
-        })
+        profile = (
+            getattr(user, "customer_profile", None) if not user.is_seller else None
+        )
+        return Response(
+            {
+                "name": profile.name if profile else "",
+                "mobile_number": profile.mobile_number if profile else "",
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "is_seller": user.is_seller,
+                "seller_status": user.seller_status,
+            }
+        )
 
 
 class CustomerLoginView(LoginView):
@@ -70,38 +74,40 @@ class SellerLoginView(LoginView):
 
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
-    throttle_scope = 'password_reset'
+    throttle_scope = "password_reset"
 
     def post(self, request):
         serializer = ForgotPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        reset_url = request.build_absolute_uri(reverse('password-reset'))
+        reset_url = request.build_absolute_uri(reverse("password-reset"))
         UserService.request_password_reset(
-            email=serializer.validated_data['email'],
+            email=serializer.validated_data["email"],
             reset_url=reset_url,
         )
         return Response(
-            {'message': 'If an account exists for that email, password reset instructions have been sent.'},
+            {
+                "message": "If an account exists for that email, password reset instructions have been sent."
+            },
             status=status.HTTP_200_OK,
         )
 
 
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
-    throttle_scope = 'password_reset'
+    throttle_scope = "password_reset"
 
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({'message': 'Password reset successfully.'})
+        return Response({"message": "Password reset successfully."})
 
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = LogoutSerializer(data=request.data, context={'request': request})
+        serializer = LogoutSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        UserService.logout(serializer.validated_data['refresh'])
-        return Response({'message': 'Logged out successfully.'})
+        UserService.logout(serializer.validated_data["refresh"])
+        return Response({"message": "Logged out successfully."})

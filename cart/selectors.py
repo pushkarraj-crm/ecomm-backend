@@ -2,9 +2,11 @@ from .models import Cart, CartItem
 
 
 def get_cart_for_user(user):
-    return Cart.objects.filter(user=user).prefetch_related(
-        'items__product_variant__product'
-    ).first()
+    return (
+        Cart.objects.filter(user=user)
+        .prefetch_related("items__product_variant__product")
+        .first()
+    )
 
 
 def get_cart_item_for_user(user, item_id):

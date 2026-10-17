@@ -39,24 +39,24 @@ class CreateProductView(APIView):
 
     def post(self, request):
         data = request.data
-        variants = data.get('variants')
+        variants = data.get("variants")
         if isinstance(variants, str):
             try:
                 variants = json.loads(variants)
             except (TypeError, ValueError):
                 variants = None
-            data = data.dict() if hasattr(data, 'dict') else dict(data)
-            data['variants'] = variants
+            data = data.dict() if hasattr(data, "dict") else dict(data)
+            data["variants"] = variants
 
         serializer = ProductWriteSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         images_by_variant = []
-        for index, _ in enumerate(serializer.validated_data['variants']):
+        for index, _ in enumerate(serializer.validated_data["variants"]):
             validated_images = []
             for image in request.FILES.getlist(f"variant_{index}_images"):
-                image_serializer = ProductImageUploadSerializer(data={'image': image})
+                image_serializer = ProductImageUploadSerializer(data={"image": image})
                 image_serializer.is_valid(raise_exception=True)
-                validated_images.append(image_serializer.validated_data['image'])
+                validated_images.append(image_serializer.validated_data["image"])
             images_by_variant.append(validated_images)
 
         ProductService.create_product_with_variants(
@@ -74,42 +74,49 @@ class CreateProductView(APIView):
 class ProductListView(APIView):
 
     def get(self, request):
-        search = request.query_params.get('search')
+        search = request.query_params.get("search")
         if search is None:
-            search = request.query_params.get('q', '')
+            search = request.query_params.get("q", "")
         search = search.strip()
         if len(search) > 100:
-            raise ValidationError({'search': 'Search must be 100 characters or fewer.'})
+            raise ValidationError({"search": "Search must be 100 characters or fewer."})
 
         sort = (
-            request.query_params.get('sort')
-            or request.query_params.get('sort_by')
-            or ''
-        ).strip().lower()
+            (
+                request.query_params.get("sort")
+                or request.query_params.get("sort_by")
+                or ""
+            )
+            .strip()
+            .lower()
+        )
         if sort and sort not in PRODUCT_SORT_OPTIONS:
-            valid_options = ', '.join(sorted(PRODUCT_SORT_OPTIONS))
-            raise ValidationError({'sort': f'Choose one of: {valid_options}.'})
+            valid_options = ", ".join(sorted(PRODUCT_SORT_OPTIONS))
+            raise ValidationError({"sort": f"Choose one of: {valid_options}."})
 
         filters = CatalogFilterSerializer(data=request.query_params.dict())
         filters.is_valid(raise_exception=True)
         has_catalog_options = bool(search or sort or filters.validated_data)
         use_pagination = (
-            'page' in request.query_params
-            or 'page_size' in request.query_params
+            "page" in request.query_params
+            or "page_size" in request.query_params
             or has_catalog_options
         )
         if request.query_params or use_pagination:
-            cache_key = f'catalog:list:query:v5:{catalog_revision()}:' + hashlib.sha256(
-                request.get_full_path().encode('utf-8')
-            ).hexdigest()
+            cache_key = (
+                f"catalog:list:query:v5:{catalog_revision()}:"
+                + hashlib.sha256(request.get_full_path().encode("utf-8")).hexdigest()
+            )
         else:
-            cache_key = f'catalog:list:all:v5:{catalog_revision()}'
+            cache_key = f"catalog:list:all:v5:{catalog_revision()}"
 
         cached_data = cache.get(cache_key)
         if cached_data is not None:
             return Response(cached_data)
 
-        products = get_all_products(search=search or None, sort=sort or None, **filters.validated_data)
+        products = get_all_products(
+            search=search or None, sort=sort or None, **filters.validated_data
+        )
         if use_pagination:
             paginator = ProductPagination()
             page = paginator.paginate_queryset(products, request, view=self)
@@ -129,7 +136,7 @@ class ProductListView(APIView):
 class ProductDetailView(APIView):
 
     def get(self, request, product_id):
-        cache_key = f'catalog:detail:v5:{catalog_revision()}:{product_id}'
+        cache_key = f"catalog:detail:v5:{catalog_revision()}:{product_id}"
         cached_data = cache.get(cache_key)
         if cached_data is not None:
             return Response(cached_data)
@@ -148,36 +155,43 @@ class CategoryListView(APIView):
     """Return the nested category data used by the seller catalog picker."""
 
     def get(self, request):
-        search = request.query_params.get('search', '').strip()
+        search = request.query_params.get("search", "").strip()
         if len(search) > 100:
-            raise ValidationError({'search': 'Search must be 100 characters or fewer.'})
-        cache_key = f'catalog:categories:v2:{catalog_revision()}:' + hashlib.sha256(
-            search.casefold().encode('utf-8')
-        ).hexdigest()
+            raise ValidationError({"search": "Search must be 100 characters or fewer."})
+        cache_key = (
+            f"catalog:categories:v2:{catalog_revision()}:"
+            + hashlib.sha256(search.casefold().encode("utf-8")).hexdigest()
+        )
         categories = cache.get(cache_key)
         if categories is None:
             categories = get_category_tree(search=search or None)
-            cache.set(cache_key, categories, max(settings.PRODUCT_CACHE_TTL_SECONDS, 60))
+            cache.set(
+                cache_key, categories, max(settings.PRODUCT_CACHE_TTL_SECONDS, 60)
+            )
         return Response(categories)
 
 
 class TrackProductInteractionView(APIView):
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = 'product_tracking'
+    throttle_scope = "product_tracking"
 
     def post(self, request, product_id):
-        event = request.data.get('event') if hasattr(request.data, 'get') else None
-        if not isinstance(event, str) or event not in {'view', 'click'}:
-            raise ValidationError({'event': 'Choose either view or click.'})
-        product = Product.objects.filter(
-            id=product_id,
-            is_active=True,
-            status='approved',
-        ).only('id').first()
+        event = request.data.get("event") if hasattr(request.data, "get") else None
+        if not isinstance(event, str) or event not in {"view", "click"}:
+            raise ValidationError({"event": "Choose either view or click."})
+        product = (
+            Product.objects.filter(
+                id=product_id,
+                is_active=True,
+                status="approved",
+            )
+            .only("id")
+            .first()
+        )
         if product is None:
             raise Http404
         ProductInteraction.objects.create(product_id=product_id, event=event)
-        return Response({'tracked': True}, status=202)
+        return Response({"tracked": True}, status=202)
 
 
 # =========================
@@ -191,9 +205,9 @@ class AddReviewView(APIView):
         serializer.is_valid(raise_exception=True)
         ReviewService.add_review(
             user=request.user,
-            product=serializer.validated_data['product'],
-            rating=serializer.validated_data['rating'],
-            comment=serializer.validated_data['comment'],
+            product=serializer.validated_data["product"],
+            rating=serializer.validated_data["rating"],
+            comment=serializer.validated_data["comment"],
         )
 
         return Response({"msg": "Review added"})
@@ -205,12 +219,23 @@ class StoreContentView(APIView):
 
     def get(self, request):
         from .models import StoreBanner
-        return Response({'banners': [
-            {'id': b.id, 'title': b.title, 'subtitle': b.subtitle,
-             'image': request.build_absolute_uri(b.image.url) if b.image else None,
-             'category': b.category_id}
-            for b in StoreBanner.objects.filter(is_active=True)[:12]
-        ]})
+
+        return Response(
+            {
+                "banners": [
+                    {
+                        "id": b.id,
+                        "title": b.title,
+                        "subtitle": b.subtitle,
+                        "image": (
+                            request.build_absolute_uri(b.image.url) if b.image else None
+                        ),
+                        "category": b.category_id,
+                    }
+                    for b in StoreBanner.objects.filter(is_active=True)[:12]
+                ]
+            }
+        )
 
 
 class DeliveryCheckView(APIView):
@@ -221,14 +246,27 @@ class DeliveryCheckView(APIView):
         from .models import DeliveryArea
         from datetime import timedelta
         from django.utils import timezone
-        code = request.query_params.get('postal_code', '')
+
+        code = request.query_params.get("postal_code", "")
         if len(code) != 6 or not code.isdigit():
-            return Response({'error': 'Enter a valid six-digit Indian pincode.'}, status=400)
+            return Response(
+                {"error": "Enter a valid six-digit Indian pincode."}, status=400
+            )
         area = DeliveryArea.objects.filter(postal_code=code, is_active=True).first()
         if not area:
-            return Response({'available': False, 'message': 'Delivery is not confirmed for this pincode. Please contact support.'})
+            return Response(
+                {
+                    "available": False,
+                    "message": "Delivery is not confirmed for this pincode. Please contact support.",
+                }
+            )
         today = timezone.localdate()
-        return Response({'available': True, 'city': area.city,
-                         'earliest': today + timedelta(days=area.min_days),
-                         'latest': today + timedelta(days=area.max_days),
-                         'message': 'Estimated delivery; the seller confirms dispatch after purchase.'})
+        return Response(
+            {
+                "available": True,
+                "city": area.city,
+                "earliest": today + timedelta(days=area.min_days),
+                "latest": today + timedelta(days=area.max_days),
+                "message": "Estimated delivery; the seller confirms dispatch after purchase.",
+            }
+        )

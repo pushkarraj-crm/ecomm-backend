@@ -6,43 +6,43 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0003_payment'),
+        ("orders", "0003_payment"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='address_line_1',
+            model_name="order",
+            name="address_line_1",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='order',
-            name='address_line_2',
+            model_name="order",
+            name="address_line_2",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='order',
-            name='city',
+            model_name="order",
+            name="city",
             field=models.CharField(blank=True, max_length=100),
         ),
         migrations.AddField(
-            model_name='order',
-            name='country',
-            field=models.CharField(default='India', max_length=100),
+            model_name="order",
+            name="country",
+            field=models.CharField(default="India", max_length=100),
         ),
         migrations.AddField(
-            model_name='order',
-            name='landmark',
+            model_name="order",
+            name="landmark",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='order',
-            name='postal_code',
+            model_name="order",
+            name="postal_code",
             field=models.CharField(blank=True, max_length=20),
         ),
         migrations.AddField(
-            model_name='order',
-            name='state',
+            model_name="order",
+            name="state",
             field=models.CharField(blank=True, max_length=100),
         ),
     ]

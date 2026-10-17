@@ -35,7 +35,9 @@ class CustomerProfileView(APIView):
         serializer = CustomerProfileInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        profile, created = save_customer_profile(request.user, serializer.validated_data)
+        profile, created = save_customer_profile(
+            request.user, serializer.validated_data
+        )
         return Response(
             CustomerProfileSerializer(profile).data,
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
@@ -98,7 +100,7 @@ class CustomerAddressDetailView(APIView):
         if address is None:
             raise Http404
         delete_customer_address(address)
-        return Response({'message': 'Address removed'})
+        return Response({"message": "Address removed"})
 
 
 class AddToCartView(APIView):
@@ -110,17 +112,17 @@ class AddToCartView(APIView):
 
         cart, item = add_to_cart(
             user=request.user,
-            product_variant=serializer.validated_data['product_variant'],
-            quantity=serializer.validated_data['quantity'],
+            product_variant=serializer.validated_data["product_variant"],
+            quantity=serializer.validated_data["quantity"],
         )
 
         return Response(
             {
-                'message': 'Item added to cart',
-                'cart_id': cart.id,
-                'item_id': item.id,
-                'variant_id': item.product_variant_id,
-                'quantity': item.quantity,
+                "message": "Item added to cart",
+                "cart_id": cart.id,
+                "item_id": item.id,
+                "variant_id": item.product_variant_id,
+                "quantity": item.quantity,
             },
             status=status.HTTP_200_OK,
         )
@@ -131,15 +133,28 @@ class SupportTicketView(APIView):
 
     def get(self, request):
         from .models import SupportTicket
-        return Response(list(SupportTicket.objects.filter(user=request.user).order_by('-id').values('id','subject','message','status','response','created_at')[:50]))
+
+        return Response(
+            list(
+                SupportTicket.objects.filter(user=request.user)
+                .order_by("-id")
+                .values("id", "subject", "message", "status", "response", "created_at")[
+                    :50
+                ]
+            )
+        )
 
     def post(self, request):
         from rest_framework import serializers
         from .models import SupportTicket
+
         class TicketInput(serializers.Serializer):
             subject = serializers.CharField(max_length=150, min_length=5)
             message = serializers.CharField(max_length=4000, min_length=10)
-        serializer=TicketInput(data=request.data)
+
+        serializer = TicketInput(data=request.data)
         serializer.is_valid(raise_exception=True)
-        ticket=SupportTicket.objects.create(user=request.user, **serializer.validated_data)
-        return Response({'id':ticket.id,'status':ticket.status}, status=201)
+        ticket = SupportTicket.objects.create(
+            user=request.user, **serializer.validated_data
+        )
+        return Response({"id": ticket.id, "status": ticket.status}, status=201)

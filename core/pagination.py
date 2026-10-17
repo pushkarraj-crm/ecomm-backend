@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 
 class ProductPagination(PageNumberPagination):
     page_size = settings.API_PAGE_SIZE
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
     max_page_size = settings.API_MAX_PAGE_SIZE
 
     def get_page_size(self, request):

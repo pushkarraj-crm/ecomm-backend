@@ -5,26 +5,29 @@ from django.db import transaction
 from products.models import Category
 from products.cache import invalidate_catalog
 
-DATA_FILE = Path(__file__).resolve().parents[2] / 'data' / 'marketplace_categories.json'
+DATA_FILE = Path(__file__).resolve().parents[2] / "data" / "marketplace_categories.json"
+
 
 class Command(BaseCommand):
-    help = 'Add the reviewed marketplace category hierarchy, preserving existing categories and product assignments.'
+    help = "Add the reviewed marketplace category hierarchy, preserving existing categories and product assignments."
 
     @transaction.atomic
     def handle(self, *args, **options):
-        dataset = json.loads(DATA_FILE.read_text(encoding='utf-8'))
+        dataset = json.loads(DATA_FILE.read_text(encoding="utf-8"))
         existing = {}
-        for category in Category.objects.order_by('pk'):
-            existing.setdefault((category.parent_id, category.name.casefold()), category)
+        for category in Category.objects.order_by("pk"):
+            existing.setdefault(
+                (category.parent_id, category.name.casefold()), category
+            )
         created = reused = 0
-        level = [(node, None) for node in dataset['categories']]
+        level = [(node, None) for node in dataset["categories"]]
         while level:
             pending = {}
             resolved = []
             for node, parent_id in level:
-                name = node['name'].strip()
+                name = node["name"].strip()
                 if not name or len(name) > 100:
-                    raise ValueError('Category names must contain 1 to 100 characters.')
+                    raise ValueError("Category names must contain 1 to 100 characters.")
                 key = (parent_id, name.casefold())
                 category = existing.get(key) or pending.get(key)
                 if category is None:
@@ -38,6 +41,14 @@ class Command(BaseCommand):
             # avoids hundreds of round trips; invalidate catalog once after commit.
             Category.objects.bulk_create(list(pending.values()))
             existing.update(pending)
-            level = [(child, category.pk) for node, category in resolved for child in node.get('children', [])]
+            level = [
+                (child, category.pk)
+                for node, category in resolved
+                for child in node.get("children", [])
+            ]
         transaction.on_commit(invalidate_catalog)
-        self.stdout.write(self.style.SUCCESS(f'Categories added: {created}; existing paths reused: {reused}.'))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Categories added: {created}; existing paths reused: {reused}."
+            )
+        )

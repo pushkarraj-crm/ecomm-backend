@@ -10,6 +10,18 @@ def catalog_changed(sender, **kwargs):
     transaction.on_commit(invalidate_catalog)
 
 
-for model in (Category, Product, ProductVariant, ProductImage, Review, SellerProfile, User):
-    post_save.connect(catalog_changed, sender=model, dispatch_uid=f'catalog-save-{model.__name__}')
-    post_delete.connect(catalog_changed, sender=model, dispatch_uid=f'catalog-delete-{model.__name__}')
+for model in (
+    Category,
+    Product,
+    ProductVariant,
+    ProductImage,
+    Review,
+    SellerProfile,
+    User,
+):
+    post_save.connect(
+        catalog_changed, sender=model, dispatch_uid=f"catalog-save-{model.__name__}"
+    )
+    post_delete.connect(
+        catalog_changed, sender=model, dispatch_uid=f"catalog-delete-{model.__name__}"
+    )

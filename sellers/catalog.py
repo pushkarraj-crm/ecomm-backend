@@ -1,4 +1,5 @@
 """Owner-scoped seller catalog management; public approval stays admin-controlled."""
+
 from django.db import transaction
 from django.db.models import Count, Q
 from django.http import Http404
@@ -15,7 +16,12 @@ from products.serializers import ProductReadSerializer
 
 class SellerCatalogReadSerializer(ProductReadSerializer):
     class Meta(ProductReadSerializer.Meta):
-        fields = ProductReadSerializer.Meta.fields + ['status', 'is_active', 'created_at', 'updated_at']
+        fields = ProductReadSerializer.Meta.fields + [
+            "status",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class SellerCatalogQuerySerializer(serializers.Serializer):
@@ -26,26 +32,45 @@ class SellerCatalogQuerySerializer(serializers.Serializer):
 
 
 class SellerCatalogUpdateSerializer(serializers.ModelSerializer):
-    specifications = serializers.DictField(child=serializers.CharField(max_length=500), required=False)
-    size_guide = serializers.CharField(max_length=4000, required=False, allow_blank=True)
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), required=False)
+    specifications = serializers.DictField(
+        child=serializers.CharField(max_length=500), required=False
+    )
+    size_guide = serializers.CharField(
+        max_length=4000, required=False, allow_blank=True
+    )
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), required=False
+    )
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'specifications', 'size_guide', 'category', 'is_active', 'return_policy', 'return_days']
-        extra_kwargs = {'name': {'required': False}, 'description': {'required': False}}
+        fields = [
+            "name",
+            "description",
+            "specifications",
+            "size_guide",
+            "category",
+            "is_active",
+            "return_policy",
+            "return_days",
+        ]
+        extra_kwargs = {"name": {"required": False}, "description": {"required": False}}
 
     def validate(self, attrs):
         if not attrs:
-            raise serializers.ValidationError('Provide at least one editable field.')
-        policy = attrs.get('return_policy', self.instance.return_policy)
-        days = attrs.get('return_days', self.instance.return_days)
-        if policy == 'no_return':
-            if attrs.get('return_days') is not None:
-                raise serializers.ValidationError({'return_days': 'Leave empty for no_return.'})
-            attrs['return_days'] = None
+            raise serializers.ValidationError("Provide at least one editable field.")
+        policy = attrs.get("return_policy", self.instance.return_policy)
+        days = attrs.get("return_days", self.instance.return_days)
+        if policy == "no_return":
+            if attrs.get("return_days") is not None:
+                raise serializers.ValidationError(
+                    {"return_days": "Leave empty for no_return."}
+                )
+            attrs["return_days"] = None
         elif days is None:
-            raise serializers.ValidationError({'return_days': 'Choose 2, 5, or 7 days.'})
+            raise serializers.ValidationError(
+                {"return_days": "Choose 2, 5, or 7 days."}
+            )
         return attrs
 
 
@@ -57,27 +82,41 @@ class SellerCatalogAPIView(APIView):
         query.is_valid(raise_exception=True)
         filters = query.validated_data
         products = catalog_products().filter(seller=request.user)
-        for key in ('status', 'is_active'):
+        for key in ("status", "is_active"):
             if key in filters:
                 products = products.filter(**{key: filters[key]})
-        if filters.get('search'):
-            products = products.filter(Q(name__icontains=filters['search']) | Q(slug__icontains=filters['search']))
-        if 'category' in filters:
-            products = products.filter(category_id__in=category_descendant_ids(filters['category']))
+        if filters.get("search"):
+            products = products.filter(
+                Q(name__icontains=filters["search"])
+                | Q(slug__icontains=filters["search"])
+            )
+        if "category" in filters:
+            products = products.filter(
+                category_id__in=category_descendant_ids(filters["category"])
+            )
         paginator = ProductPagination()
-        page = paginator.paginate_queryset(products.order_by('-created_at', '-id'), request, view=self)
-        return paginator.get_paginated_response(SellerCatalogReadSerializer(page, many=True).data)
+        page = paginator.paginate_queryset(
+            products.order_by("-created_at", "-id"), request, view=self
+        )
+        return paginator.get_paginated_response(
+            SellerCatalogReadSerializer(page, many=True).data
+        )
 
 
 class SellerCatalogSummaryAPIView(APIView):
     permission_classes = [IsAuthenticated, IsSeller]
 
     def get(self, request):
-        return Response(Product.objects.filter(seller=request.user).aggregate(
-            total=Count('id'), approved=Count('id', filter=Q(status='approved')),
-            pending=Count('id', filter=Q(status='pending')), rejected=Count('id', filter=Q(status='rejected')),
-            active=Count('id', filter=Q(is_active=True)), inactive=Count('id', filter=Q(is_active=False)),
-        ))
+        return Response(
+            Product.objects.filter(seller=request.user).aggregate(
+                total=Count("id"),
+                approved=Count("id", filter=Q(status="approved")),
+                pending=Count("id", filter=Q(status="pending")),
+                rejected=Count("id", filter=Q(status="rejected")),
+                active=Count("id", filter=Q(is_active=True)),
+                inactive=Count("id", filter=Q(is_active=False)),
+            )
+        )
 
 
 class SellerCatalogDetailAPIView(APIView):
@@ -91,13 +130,23 @@ class SellerCatalogDetailAPIView(APIView):
 
     @transaction.atomic
     def patch(self, request, product_id):
-        product = Product.objects.select_for_update().filter(pk=product_id, seller=request.user).first()
+        product = (
+            Product.objects.select_for_update()
+            .filter(pk=product_id, seller=request.user)
+            .first()
+        )
         if product is None:
             raise Http404
-        serializer = SellerCatalogUpdateSerializer(product, data=request.data, partial=True)
+        serializer = SellerCatalogUpdateSerializer(
+            product, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
-        changed_content = any(getattr(product, key) != value for key, value in serializer.validated_data.items() if key != 'is_active')
+        changed_content = any(
+            getattr(product, key) != value
+            for key, value in serializer.validated_data.items()
+            if key != "is_active"
+        )
         # Sellers may pause listings, but cannot self-approve modified content.
-        serializer.save(**({'status': 'pending'} if changed_content else {}))
+        serializer.save(**({"status": "pending"} if changed_content else {}))
         updated = catalog_products().get(pk=product.pk)
         return Response(SellerCatalogReadSerializer(updated).data)

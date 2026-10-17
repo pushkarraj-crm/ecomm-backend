@@ -8,15 +8,16 @@ from .views import (
     CustomerProfileView,
 )
 
-
 urlpatterns = [
-    path('support/', SupportTicketView.as_view()),
-    path('profile/', CustomerProfileView.as_view(), name='customer-profile'),
-    path('addresses/', CustomerAddressListCreateView.as_view(), name='customer-addresses'),
+    path("support/", SupportTicketView.as_view()),
+    path("profile/", CustomerProfileView.as_view(), name="customer-profile"),
     path(
-        'addresses/<int:address_id>/',
-        CustomerAddressDetailView.as_view(),
-        name='customer-address-detail',
+        "addresses/", CustomerAddressListCreateView.as_view(), name="customer-addresses"
     ),
-    path('cart/add/', AddToCartView.as_view(), name='customer-add-to-cart'),
+    path(
+        "addresses/<int:address_id>/",
+        CustomerAddressDetailView.as_view(),
+        name="customer-address-detail",
+    ),
+    path("cart/add/", AddToCartView.as_view(), name="customer-add-to-cart"),
 ]

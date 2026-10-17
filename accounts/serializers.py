@@ -29,24 +29,28 @@ class CustomerRegisterSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        profile_fields = {'name', 'mobile_number'}
+        profile_fields = {"name", "mobile_number"}
         supplied_profile_fields = profile_fields.intersection(attrs)
         if supplied_profile_fields and supplied_profile_fields != profile_fields:
             missing_fields = sorted(profile_fields - supplied_profile_fields)
-            raise serializers.ValidationError({
-                field: 'Required when creating a profile during signup.'
-                for field in missing_fields
-            })
-        if 'addresses' in attrs and supplied_profile_fields != profile_fields:
-            raise serializers.ValidationError({
-                field: 'Required when adding profile details during signup.'
-                for field in sorted(profile_fields - supplied_profile_fields)
-            })
-        addresses = attrs.get('addresses', [])
-        if sum(address.get('is_default', False) for address in addresses) > 1:
-            raise serializers.ValidationError({
-                'addresses': 'Only one address can be the default.'
-            })
+            raise serializers.ValidationError(
+                {
+                    field: "Required when creating a profile during signup."
+                    for field in missing_fields
+                }
+            )
+        if "addresses" in attrs and supplied_profile_fields != profile_fields:
+            raise serializers.ValidationError(
+                {
+                    field: "Required when adding profile details during signup."
+                    for field in sorted(profile_fields - supplied_profile_fields)
+                }
+            )
+        addresses = attrs.get("addresses", [])
+        if sum(address.get("is_default", False) for address in addresses) > 1:
+            raise serializers.ValidationError(
+                {"addresses": "Only one address can be the default."}
+            )
         return attrs
 
     def create(self, data):
@@ -54,32 +58,57 @@ class CustomerRegisterSerializer(serializers.Serializer):
 
 
 class SellerRegisterSerializer(serializers.Serializer):
-    email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all(), message='An account with this email already exists. Please sign in.')])
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="An account with this email already exists. Please sign in.",
+            )
+        ]
+    )
     password = serializers.CharField()
-    business_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    business_name = serializers.CharField(
+        max_length=255, required=False, allow_blank=True
+    )
     store_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
-    owner_full_name = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    owner_full_name = serializers.CharField(
+        max_length=255, required=False, allow_blank=True
+    )
     business_type = serializers.ChoiceField(
         choices=[
-            'individual', 'sole_proprietorship', 'partnership', 'llp',
-            'private_limited', 'public_limited', 'other',
+            "individual",
+            "sole_proprietorship",
+            "partnership",
+            "llp",
+            "private_limited",
+            "public_limited",
+            "other",
         ],
         required=False,
     )
     gst_registered = serializers.BooleanField(required=False, default=False)
-    gst_number = serializers.CharField(max_length=15, min_length=15, required=False, allow_blank=True)
+    gst_number = serializers.CharField(
+        max_length=15, min_length=15, required=False, allow_blank=True
+    )
 
     def validate(self, attrs):
-        gst_number = attrs.get('gst_number', '').strip().upper()
-        attrs['gst_number'] = gst_number
+        gst_number = attrs.get("gst_number", "").strip().upper()
+        attrs["gst_number"] = gst_number
         if gst_number and not re.fullmatch(
-            r'[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]', gst_number,
+            r"[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]",
+            gst_number,
         ):
-            raise serializers.ValidationError({'gst_number': 'Enter a valid 15-character GSTIN.'})
-        if attrs.get('gst_registered') and not gst_number:
-            raise serializers.ValidationError({'gst_number': 'Required when GST is enabled.'})
-        if not attrs.get('gst_registered') and gst_number:
-            raise serializers.ValidationError({'gst_number': 'Leave blank when GST is disabled.'})
+            raise serializers.ValidationError(
+                {"gst_number": "Enter a valid 15-character GSTIN."}
+            )
+        if attrs.get("gst_registered") and not gst_number:
+            raise serializers.ValidationError(
+                {"gst_number": "Required when GST is enabled."}
+            )
+        if not attrs.get("gst_registered") and gst_number:
+            raise serializers.ValidationError(
+                {"gst_number": "Leave blank when GST is disabled."}
+            )
         return attrs
 
     def create(self, data):
@@ -91,9 +120,9 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, data):
-        user = authenticate(email=data['email'], password=data['password'])
+        user = authenticate(email=data["email"], password=data["password"])
         if user:
-            data['user'] = user
+            data["user"] = user
             return data
         raise serializers.ValidationError("Invalid credentials")
 
@@ -101,7 +130,7 @@ class LoginSerializer(serializers.Serializer):
 class CustomerLoginSerializer(LoginSerializer):
     def validate(self, data):
         data = super().validate(data)
-        if not data['user'].is_customer or data['user'].is_seller:
+        if not data["user"].is_customer or data["user"].is_seller:
             raise serializers.ValidationError("Invalid credentials")
         return data
 
@@ -109,7 +138,7 @@ class CustomerLoginSerializer(LoginSerializer):
 class SellerLoginSerializer(LoginSerializer):
     def validate(self, data):
         data = super().validate(data)
-        if not data['user'].is_seller:
+        if not data["user"].is_seller:
             raise serializers.ValidationError("Invalid credentials")
         return data
 
@@ -125,28 +154,32 @@ class ResetPasswordSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         try:
-            user_id = force_str(urlsafe_base64_decode(attrs['uid']))
+            user_id = force_str(urlsafe_base64_decode(attrs["uid"]))
         except (TypeError, ValueError, OverflowError, UnicodeDecodeError):
             user_id = None
 
         user = get_active_user_by_id(user_id) if user_id else None
-        if user is None or not default_token_generator.check_token(user, attrs['token']):
-            raise serializers.ValidationError('The password reset link is invalid or expired.')
+        if user is None or not default_token_generator.check_token(
+            user, attrs["token"]
+        ):
+            raise serializers.ValidationError(
+                "The password reset link is invalid or expired."
+            )
 
         try:
-            validate_password(attrs['new_password'], user=user)
+            validate_password(attrs["new_password"], user=user)
         except DjangoValidationError as error:
-            raise serializers.ValidationError({'new_password': error.messages})
+            raise serializers.ValidationError({"new_password": error.messages})
 
-        attrs['user'] = user
+        attrs["user"] = user
         return attrs
 
     def create(self, validated_data):
         UserService.reset_password(
-            user=validated_data['user'],
-            new_password=validated_data['new_password'],
+            user=validated_data["user"],
+            new_password=validated_data["new_password"],
         )
-        return validated_data['user']
+        return validated_data["user"]
 
 
 class LogoutSerializer(serializers.Serializer):
@@ -156,10 +189,12 @@ class LogoutSerializer(serializers.Serializer):
         try:
             token = RefreshToken(value)
         except TokenError:
-            raise serializers.ValidationError('Invalid or expired refresh token.')
+            raise serializers.ValidationError("Invalid or expired refresh token.")
 
-        request = self.context['request']
+        request = self.context["request"]
         token_user_id = token.get(api_settings.USER_ID_CLAIM)
         if str(token_user_id) != str(request.user.pk):
-            raise serializers.ValidationError('Refresh token does not belong to this user.')
+            raise serializers.ValidationError(
+                "Refresh token does not belong to this user."
+            )
         return value

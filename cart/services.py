@@ -12,7 +12,7 @@ def get_or_create_cart(user):
 @transaction.atomic
 def update_cart_item(item, quantity):
     item.quantity = quantity
-    item.save(update_fields=['quantity'])
+    item.save(update_fields=["quantity"])
     return item
 
 

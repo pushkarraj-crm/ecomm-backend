@@ -1,4 +1,8 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    PermissionsMixin,
+    BaseUserManager,
+)
 from django.db import models
 
 
@@ -24,12 +28,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_seller = models.BooleanField(default=False)
 
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
     )
 
-    seller_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    seller_status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default="pending"
+    )
     is_blacklisted = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
@@ -37,7 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
 
     def __str__(self):
         return self.email

@@ -1,21 +1,35 @@
-from django.db.models import Avg, Count, Exists, F, Min, OuterRef, Q, Subquery, IntegerField, Prefetch
+from django.db.models import (
+    Avg,
+    Count,
+    Exists,
+    F,
+    Min,
+    OuterRef,
+    Q,
+    Subquery,
+    IntegerField,
+    Prefetch,
+)
 from django.db.models.functions import Coalesce
 from .models import Category, Product, ProductVariant, Review
 
-
 PRODUCT_SORT_OPTIONS = {
-    'price_asc',
-    'price_desc',
-    'newest',
-    'oldest',
-    'name_asc',
-    'name_desc',
+    "price_asc",
+    "price_desc",
+    "newest",
+    "oldest",
+    "name_asc",
+    "name_desc",
 }
 
 
 def category_descendant_ids(category_id):
-    rows = list(Category.objects.values_list('id', 'parent_id'))
-    included = set(category_id) if isinstance(category_id, (list, tuple, set)) else {category_id}
+    rows = list(Category.objects.values_list("id", "parent_id"))
+    included = (
+        set(category_id)
+        if isinstance(category_id, (list, tuple, set))
+        else {category_id}
+    )
     while True:
         children = {pk for pk, parent in rows if parent in included}
         if children <= included:
@@ -24,39 +38,81 @@ def category_descendant_ids(category_id):
 
 
 def catalog_products():
-    reviews = Review.objects.filter(product_id=OuterRef('pk')).order_by().values('product_id')
-    return Product.objects.select_related('category', 'seller__seller_profile').prefetch_related(
-        'variants__images', Prefetch('reviews', queryset=Review.objects.order_by('-id'), to_attr='public_reviews')
-    ).annotate(
-        catalog_price=Coalesce(Min('variants__price', filter=Q(variants__stock__gt=0)), Min('variants__price')),
-        catalog_rating=Subquery(reviews.annotate(value=Avg('rating')).values('value')[:1]),
-        catalog_review_count=Coalesce(Subquery(reviews.annotate(value=Count('id')).values('value')[:1], output_field=IntegerField()), 0),
-        catalog_in_stock=Exists(ProductVariant.objects.filter(product_id=OuterRef('pk'), stock__gt=0)),
+    reviews = (
+        Review.objects.filter(product_id=OuterRef("pk")).order_by().values("product_id")
+    )
+    return (
+        Product.objects.select_related("category", "seller__seller_profile")
+        .prefetch_related(
+            "variants__images",
+            Prefetch(
+                "reviews",
+                queryset=Review.objects.order_by("-id"),
+                to_attr="public_reviews",
+            ),
+        )
+        .annotate(
+            catalog_price=Coalesce(
+                Min("variants__price", filter=Q(variants__stock__gt=0)),
+                Min("variants__price"),
+            ),
+            catalog_rating=Subquery(
+                reviews.annotate(value=Avg("rating")).values("value")[:1]
+            ),
+            catalog_review_count=Coalesce(
+                Subquery(
+                    reviews.annotate(value=Count("id")).values("value")[:1],
+                    output_field=IntegerField(),
+                ),
+                0,
+            ),
+            catalog_in_stock=Exists(
+                ProductVariant.objects.filter(product_id=OuterRef("pk"), stock__gt=0)
+            ),
+        )
     )
 
 
 def get_all_products(search=None, sort=None, **filters):
-    products = catalog_products().filter(is_active=True, status='approved', seller__is_active=True, seller__is_blacklisted=False)
-    if 'category_ids' in filters:
-        products = products.filter(category_id__in=category_descendant_ids(filters['category_ids']))
-    elif 'category' in filters:
-        products = products.filter(category_id__in=category_descendant_ids(filters['category']))
-    if 'seller' in filters:
-        products = products.filter(seller_id=filters['seller'])
-    if 'min_rating' in filters:
-        products = products.filter(catalog_rating__gte=filters['min_rating'])
-    if 'in_stock' in filters:
-        products = products.filter(catalog_in_stock=filters['in_stock'])
+    products = catalog_products().filter(
+        is_active=True,
+        status="approved",
+        seller__is_active=True,
+        seller__is_blacklisted=False,
+    )
+    if "category_ids" in filters:
+        products = products.filter(
+            category_id__in=category_descendant_ids(filters["category_ids"])
+        )
+    elif "category" in filters:
+        products = products.filter(
+            category_id__in=category_descendant_ids(filters["category"])
+        )
+    if "seller" in filters:
+        products = products.filter(seller_id=filters["seller"])
+    if "min_rating" in filters:
+        products = products.filter(catalog_rating__gte=filters["min_rating"])
+    if "in_stock" in filters:
+        products = products.filter(catalog_in_stock=filters["in_stock"])
     variant_filters = {}
-    for name, lookup in [('min_price', 'price__gte'), ('max_price', 'price__lte'), ('size', 'size__iexact'), ('color', 'color__iexact')]:
+    for name, lookup in [
+        ("min_price", "price__gte"),
+        ("max_price", "price__lte"),
+        ("size", "size__iexact"),
+        ("color", "color__iexact"),
+    ]:
         if name in filters:
             variant_filters[lookup] = filters[name]
     if variant_filters:
         # All variant constraints must match the same purchasable option.
-        variant_filters['stock__gt'] = 0
-        products = products.alias(matching_option=Exists(ProductVariant.objects.filter(
-            product_id=OuterRef('pk'), **variant_filters
-        ))).filter(matching_option=True)
+        variant_filters["stock__gt"] = 0
+        products = products.alias(
+            matching_option=Exists(
+                ProductVariant.objects.filter(
+                    product_id=OuterRef("pk"), **variant_filters
+                )
+            )
+        ).filter(matching_option=True)
 
     if search:
         # Each word may match any customer-visible product text or variant detail.
@@ -64,11 +120,9 @@ def get_all_products(search=None, sort=None, **filters):
         # the expensive DISTINCT that a multi-valued join would require.
         for index, term in enumerate(search.split()):
             matching_variant = ProductVariant.objects.filter(
-                product_id=OuterRef('pk'),
-            ).filter(
-                Q(size__icontains=term) | Q(color__icontains=term)
-            )
-            variant_match_alias = f'catalog_variant_match_{index}'
+                product_id=OuterRef("pk"),
+            ).filter(Q(size__icontains=term) | Q(color__icontains=term))
+            variant_match_alias = f"catalog_variant_match_{index}"
             products = products.alias(
                 **{variant_match_alias: Exists(matching_variant)}
             ).filter(
@@ -78,26 +132,26 @@ def get_all_products(search=None, sort=None, **filters):
                 | Q(**{variant_match_alias: True})
             )
 
-    if sort in ('price_asc', 'price_desc'):
+    if sort in ("price_asc", "price_desc"):
         products = products.annotate(
             catalog_min_price=Min(
-                'variants__price',
+                "variants__price",
                 filter=Q(variants__stock__gt=0),
             )
         )
         price_order = (
-            F('catalog_min_price').asc(nulls_last=True)
-            if sort == 'price_asc'
-            else F('catalog_min_price').desc(nulls_last=True)
+            F("catalog_min_price").asc(nulls_last=True)
+            if sort == "price_asc"
+            else F("catalog_min_price").desc(nulls_last=True)
         )
-        return products.order_by(price_order, 'id')
+        return products.order_by(price_order, "id")
 
     ordering = {
-        'newest': ('-created_at', '-id'),
-        'oldest': ('created_at', 'id'),
-        'name_asc': ('name', 'id'),
-        'name_desc': ('-name', '-id'),
-    }.get(sort, ('-created_at', '-id'))
+        "newest": ("-created_at", "-id"),
+        "oldest": ("created_at", "id"),
+        "name_asc": ("name", "id"),
+        "name_desc": ("-name", "-id"),
+    }.get(sort, ("-created_at", "-id"))
     return products.order_by(*ordering)
 
 
@@ -106,23 +160,39 @@ def get_seller_products(seller):
 
 
 def get_seller_rating(seller):
-    return Review.objects.filter(
-        product__seller=seller
-    ).aggregate(avg=Avg('rating'))['avg'] or 0
+    return (
+        Review.objects.filter(product__seller=seller).aggregate(avg=Avg("rating"))[
+            "avg"
+        ]
+        or 0
+    )
 
 
 def get_product_detail(product_id):
-    return catalog_products().filter(id=product_id, is_active=True, status='approved', seller__is_active=True, seller__is_blacklisted=False).first()
+    return (
+        catalog_products()
+        .filter(
+            id=product_id,
+            is_active=True,
+            status="approved",
+            seller__is_active=True,
+            seller__is_blacklisted=False,
+        )
+        .first()
+    )
 
 
 def get_category_tree(search=None):
     """Build the category picker tree from one bounded category query."""
-    categories = list(Category.objects.only('id', 'name', 'parent_id', 'image').order_by('name', 'id'))
+    categories = list(
+        Category.objects.only("id", "name", "parent_id", "image").order_by("name", "id")
+    )
     by_id = {category.id: category for category in categories}
     included = set(by_id)
     if search:
         matched = {
-            category.id for category in categories
+            category.id
+            for category in categories
             if search.casefold() in category.name.casefold()
         }
         included = set(matched)
@@ -146,18 +216,20 @@ def get_category_tree(search=None):
             return None
         next_path = path | {category.id}
         child_nodes = [
-            node for child in children.get(category.id, [])
+            node
+            for child in children.get(category.id, [])
             if (node := serialize(child, next_path)) is not None
         ]
         return {
-            'id': category.id,
-            'name': category.name,
-            'parent_id': category.parent_id,
-            'image': category.image.url if category.image else None,
-            'children': child_nodes,
+            "id": category.id,
+            "name": category.name,
+            "parent_id": category.parent_id,
+            "image": category.image.url if category.image else None,
+            "children": child_nodes,
         }
 
     return [
-        node for category in children.get(None, [])
+        node
+        for category in children.get(None, [])
         if (node := serialize(category, set())) is not None
     ]

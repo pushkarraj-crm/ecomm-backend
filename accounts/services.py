@@ -17,14 +17,13 @@ class UserService:
     @transaction.atomic
     def create_customer(data):
         user = User.objects.create_user(
-            email=data.get('email'),
-            password=data.get('password')
+            email=data.get("email"), password=data.get("password")
         )
-        profile_fields = {'name', 'mobile_number'}
+        profile_fields = {"name", "mobile_number"}
         if profile_fields.issubset(data):
             profile_data = {field: data[field] for field in profile_fields}
-            if 'addresses' in data:
-                profile_data['addresses'] = data['addresses']
+            if "addresses" in data:
+                profile_data["addresses"] = data["addresses"]
             save_customer_profile(
                 user,
                 profile_data,
@@ -35,36 +34,35 @@ class UserService:
     @transaction.atomic
     def create_seller(data):
         user = User.objects.create_user(
-            email=data.get('email'),
-            password=data.get('password')
+            email=data.get("email"), password=data.get("password")
         )
         user.is_seller = True
         user.is_customer = False
-        user.seller_status = 'pending'
-        user.save(update_fields=['is_seller', 'is_customer', 'seller_status'])
+        user.seller_status = "pending"
+        user.save(update_fields=["is_seller", "is_customer", "seller_status"])
 
-        store_name = data.get('store_name') or data.get('business_name') or user.email
+        store_name = data.get("store_name") or data.get("business_name") or user.email
         create_seller_profile(
             user,
             store_name,
             store_name=store_name,
-            owner_full_name=data.get('owner_full_name', ''),
-            business_type=data.get('business_type', ''),
-            gst_registered=data.get('gst_registered', False),
-            gst_number=data.get('gst_number') or None,
+            owner_full_name=data.get("owner_full_name", ""),
+            business_type=data.get("business_type", ""),
+            gst_registered=data.get("gst_registered", False),
+            gst_number=data.get("gst_number") or None,
         )
         return user
 
     @staticmethod
     def approve_seller(user):
-        user.seller_status = 'approved'
-        user.save(update_fields=['seller_status'])
+        user.seller_status = "approved"
+        user.save(update_fields=["seller_status"])
         return user
 
     @staticmethod
     def blacklist_user(user):
         user.is_blacklisted = True
-        user.save(update_fields=['is_blacklisted'])
+        user.save(update_fields=["is_blacklisted"])
         return user
 
     @staticmethod
@@ -76,15 +74,15 @@ class UserService:
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         message = (
-            'A password reset was requested for this account.\n\n'
-            f'Use this endpoint: {reset_url}\n'
-            'Send a POST request with this JSON body:\n'
+            "A password reset was requested for this account.\n\n"
+            f"Use this endpoint: {reset_url}\n"
+            "Send a POST request with this JSON body:\n"
             f'{{"uid": "{uid}", "token": "{token}", '
             '"new_password": "your new password"}\n\n'
-            'If you did not request this change, ignore this email.'
+            "If you did not request this change, ignore this email."
         )
         send_mail(
-            subject='Reset your Marketplace password',
+            subject="Reset your Marketplace password",
             message=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
@@ -100,7 +98,7 @@ class UserService:
         )
 
         user.set_password(new_password)
-        user.save(update_fields=['password'])
+        user.save(update_fields=["password"])
         for token in OutstandingToken.objects.filter(user=user):
             BlacklistedToken.objects.get_or_create(token=token)
 

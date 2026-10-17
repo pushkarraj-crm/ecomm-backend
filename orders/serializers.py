@@ -3,15 +3,25 @@ from .models import Payment, Refund, SellerOrder, OrderItem, Order
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = serializers.CharField(source='product_variant.__str__')
-    variant_id = serializers.IntegerField(source='product_variant_id', read_only=True)
-    product_name = serializers.CharField(source='product_variant.product.name', read_only=True)
-    size = serializers.CharField(source='product_variant.size', read_only=True)
-    color = serializers.CharField(source='product_variant.color', read_only=True)
+    product = serializers.CharField(source="product_variant.__str__")
+    variant_id = serializers.IntegerField(source="product_variant_id", read_only=True)
+    product_name = serializers.CharField(
+        source="product_variant.product.name", read_only=True
+    )
+    size = serializers.CharField(source="product_variant.size", read_only=True)
+    color = serializers.CharField(source="product_variant.color", read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['product', 'variant_id', 'product_name', 'size', 'color', 'quantity', 'price']
+        fields = [
+            "product",
+            "variant_id",
+            "product_name",
+            "size",
+            "color",
+            "quantity",
+            "price",
+        ]
 
 
 class SellerRefundSerializer(serializers.ModelSerializer):
@@ -19,7 +29,7 @@ class SellerRefundSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Refund
-        fields = ['id', 'amount', 'reason', 'status', 'failure_reason', 'created_at']
+        fields = ["id", "amount", "reason", "status", "failure_reason", "created_at"]
 
     def get_amount(self, instance):
         return round(instance.amount_paise / 100, 2)
@@ -28,49 +38,67 @@ class SellerRefundSerializer(serializers.ModelSerializer):
 class SellerOrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True)
     order_id = serializers.IntegerField(read_only=True)
-    order_status = serializers.CharField(source='order.status', read_only=True)
+    order_status = serializers.CharField(source="order.status", read_only=True)
     payment_status = serializers.SerializerMethodField()
-    created_at = serializers.DateTimeField(source='order.created_at', read_only=True)
+    created_at = serializers.DateTimeField(source="order.created_at", read_only=True)
     customer = serializers.SerializerMethodField()
     customer_requests = serializers.SerializerMethodField()
 
     def get_customer_requests(self, instance):
-        return list(instance.customer_requests.values("id", "kind", "reason", "status", "response", "created_at"))
+        return list(
+            instance.customer_requests.values(
+                "id", "kind", "reason", "status", "response", "created_at"
+            )
+        )
 
     refunds = SellerRefundSerializer(many=True, read_only=True)
 
     class Meta:
         model = SellerOrder
         fields = [
-            'id', 'order_id', 'seller', 'total_amount', 'status', 'order_status',
-            'payment_status', 'created_at', 'customer', 'items', 'refunds',
-            'carrier', 'tracking_number', 'tracking_url', 'delivered_at', 'customer_requests',
+            "id",
+            "order_id",
+            "seller",
+            "total_amount",
+            "status",
+            "order_status",
+            "payment_status",
+            "created_at",
+            "customer",
+            "items",
+            "refunds",
+            "carrier",
+            "tracking_number",
+            "tracking_url",
+            "delivered_at",
+            "customer_requests",
         ]
 
     def get_payment_status(self, seller_order):
         try:
             return seller_order.order.payment.status
         except Payment.DoesNotExist:
-            return 'paid'
+            return "paid"
 
     def get_customer(self, seller_order):
         order = seller_order.order
         address = {
-            'address_line_1': order.address_line_1,
-            'address_line_2': order.address_line_2,
-            'landmark': order.landmark,
-            'city': order.city,
-            'state': order.state,
-            'postal_code': order.postal_code,
-            'country': order.country,
-            'address': order.address,
+            "address_line_1": order.address_line_1,
+            "address_line_2": order.address_line_2,
+            "landmark": order.landmark,
+            "city": order.city,
+            "state": order.state,
+            "postal_code": order.postal_code,
+            "country": order.country,
+            "address": order.address,
         }
         return {
-            'name': order.name,
-            'phone': order.phone,
-            'email': order.email,
-            'address': address,
+            "name": order.name,
+            "phone": order.phone,
+            "email": order.email,
+            "address": address,
         }
+
 
 class OrderSerializer(serializers.ModelSerializer):
     seller_orders = SellerOrderSerializer(many=True)
@@ -79,30 +107,32 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id',
-            'name',
-            'phone',
-            'email',
-            'address',
-            'address_line_1',
-            'address_line_2',
-            'landmark',
-            'city',
-            'state',
-            'postal_code',
-            'country',
-            'total_amount', 'coupon_code', 'discount_amount',
-            'created_at',
-            'status',
-            'payment_status',
-            'seller_orders'
+            "id",
+            "name",
+            "phone",
+            "email",
+            "address",
+            "address_line_1",
+            "address_line_2",
+            "landmark",
+            "city",
+            "state",
+            "postal_code",
+            "country",
+            "total_amount",
+            "coupon_code",
+            "discount_amount",
+            "created_at",
+            "status",
+            "payment_status",
+            "seller_orders",
         ]
 
     def get_payment_status(self, order):
         try:
             return order.payment.status
         except Payment.DoesNotExist:
-            return 'paid'
+            return "paid"
 
 
 class CheckoutSerializer(serializers.Serializer):
@@ -113,9 +143,9 @@ class CheckoutSerializer(serializers.Serializer):
     address = serializers.CharField(required=False, allow_blank=False)
 
     def validate(self, attrs):
-        if ('address_id' in attrs) == ('address' in attrs):
+        if ("address_id" in attrs) == ("address" in attrs):
             raise serializers.ValidationError(
-                'Provide exactly one of address_id or address.'
+                "Provide exactly one of address_id or address."
             )
         return attrs
 

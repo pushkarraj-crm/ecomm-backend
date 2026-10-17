@@ -6,43 +6,43 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('customers', '0001_initial'),
+        ("customers", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customeraddress',
-            name='address_line_1',
+            model_name="customeraddress",
+            name="address_line_1",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='customeraddress',
-            name='address_line_2',
+            model_name="customeraddress",
+            name="address_line_2",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='customeraddress',
-            name='city',
+            model_name="customeraddress",
+            name="city",
             field=models.CharField(blank=True, max_length=100),
         ),
         migrations.AddField(
-            model_name='customeraddress',
-            name='country',
-            field=models.CharField(default='India', max_length=100),
+            model_name="customeraddress",
+            name="country",
+            field=models.CharField(default="India", max_length=100),
         ),
         migrations.AddField(
-            model_name='customeraddress',
-            name='landmark',
+            model_name="customeraddress",
+            name="landmark",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AddField(
-            model_name='customeraddress',
-            name='postal_code',
+            model_name="customeraddress",
+            name="postal_code",
             field=models.CharField(blank=True, max_length=20),
         ),
         migrations.AddField(
-            model_name='customeraddress',
-            name='state',
+            model_name="customeraddress",
+            name="state",
             field=models.CharField(blank=True, max_length=100),
         ),
     ]

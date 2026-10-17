@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0008_order_coupon_code_order_discount_amount_coupon'),
+        ("orders", "0008_order_coupon_code_order_discount_amount_coupon"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='orderitem',
-            name='return_days',
+            model_name="orderitem",
+            name="return_days",
             field=models.PositiveSmallIntegerField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='orderitem',
-            name='return_policy',
+            model_name="orderitem",
+            name="return_policy",
             field=models.CharField(blank=True, max_length=24, null=True),
         ),
     ]

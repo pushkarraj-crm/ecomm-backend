@@ -15,44 +15,123 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='SellerProfile',
+            name="SellerProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('business_name', models.CharField(max_length=255)),
-                ('gst_number', models.CharField(blank=True, max_length=50, null=True)),
-                ('is_kyc_verified', models.BooleanField(default=False)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='seller_profile', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("business_name", models.CharField(max_length=255)),
+                ("gst_number", models.CharField(blank=True, max_length=50, null=True)),
+                ("is_kyc_verified", models.BooleanField(default=False)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="seller_profile",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Payout',
+            name="Payout",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.FloatField()),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('processed', 'Processed'), ('failed', 'Failed')], default='pending', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('seller', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sellers.sellerprofile')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.FloatField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("processed", "Processed"),
+                            ("failed", "Failed"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "seller",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="sellers.sellerprofile",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='KYC',
+            name="KYC",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('pan_card', models.CharField(max_length=20)),
-                ('aadhaar_number', models.CharField(max_length=20)),
-                ('document', models.FileField(upload_to='kyc/')),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='pending', max_length=20)),
-                ('seller', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='sellers.sellerprofile')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("pan_card", models.CharField(max_length=20)),
+                ("aadhaar_number", models.CharField(max_length=20)),
+                ("document", models.FileField(upload_to="kyc/")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("approved", "Approved"),
+                            ("rejected", "Rejected"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "seller",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="sellers.sellerprofile",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='BankAccount',
+            name="BankAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('account_holder_name', models.CharField(max_length=255)),
-                ('account_number', models.CharField(max_length=50)),
-                ('ifsc_code', models.CharField(max_length=20)),
-                ('seller', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='sellers.sellerprofile')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("account_holder_name", models.CharField(max_length=255)),
+                ("account_number", models.CharField(max_length=50)),
+                ("ifsc_code", models.CharField(max_length=20)),
+                (
+                    "seller",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="sellers.sellerprofile",
+                    ),
+                ),
             ],
         ),
     ]

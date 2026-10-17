@@ -9,21 +9,46 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('customers', '0002_customeraddress_address_line_1_and_more'),
+        ("customers", "0002_customeraddress_address_line_1_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SupportTicket',
+            name="SupportTicket",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('subject', models.CharField(max_length=150)),
-                ('message', models.TextField(max_length=4000)),
-                ('status', models.CharField(choices=[('open', 'Open'), ('answered', 'Answered'), ('closed', 'Closed')], default='open', max_length=12)),
-                ('response', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("subject", models.CharField(max_length=150)),
+                ("message", models.TextField(max_length=4000)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("open", "Open"),
+                            ("answered", "Answered"),
+                            ("closed", "Closed"),
+                        ],
+                        default="open",
+                        max_length=12,
+                    ),
+                ),
+                ("response", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

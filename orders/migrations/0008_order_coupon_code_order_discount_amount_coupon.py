@@ -9,31 +9,54 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('orders', '0007_sellerorder_carrier_sellerorder_delivered_at_and_more'),
+        ("orders", "0007_sellerorder_carrier_sellerorder_delivered_at_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='coupon_code',
+            model_name="order",
+            name="coupon_code",
             field=models.CharField(blank=True, max_length=40),
         ),
         migrations.AddField(
-            model_name='order',
-            name='discount_amount',
+            model_name="order",
+            name="discount_amount",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
         ),
         migrations.CreateModel(
-            name='Coupon',
+            name="Coupon",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('code', models.CharField(max_length=40, unique=True)),
-                ('percent', models.PositiveSmallIntegerField(help_text='Seller-funded percentage, applied to this seller’s items only.')),
-                ('minimum_subtotal', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('starts_at', models.DateTimeField()),
-                ('expires_at', models.DateTimeField()),
-                ('is_active', models.BooleanField(default=False)),
-                ('seller', models.ForeignKey(limit_choices_to={'is_seller': True}, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("code", models.CharField(max_length=40, unique=True)),
+                (
+                    "percent",
+                    models.PositiveSmallIntegerField(
+                        help_text="Seller-funded percentage, applied to this seller’s items only."
+                    ),
+                ),
+                (
+                    "minimum_subtotal",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12),
+                ),
+                ("starts_at", models.DateTimeField()),
+                ("expires_at", models.DateTimeField()),
+                ("is_active", models.BooleanField(default=False)),
+                (
+                    "seller",
+                    models.ForeignKey(
+                        limit_choices_to={"is_seller": True},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

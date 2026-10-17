@@ -34,7 +34,7 @@ class UpdateCartItemView(APIView):
 
         serializer = CartItemUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        update_cart_item(item, serializer.validated_data['quantity'])
+        update_cart_item(item, serializer.validated_data["quantity"])
 
         return Response({"message": "Cart updated"})
 

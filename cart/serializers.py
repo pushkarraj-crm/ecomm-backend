@@ -3,12 +3,14 @@ from .models import Cart, CartItem
 
 
 class CartItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='product_variant.product.name', read_only=True)
-    price = serializers.FloatField(source='product_variant.price', read_only=True)
+    product_name = serializers.CharField(
+        source="product_variant.product.name", read_only=True
+    )
+    price = serializers.FloatField(source="product_variant.price", read_only=True)
 
     class Meta:
         model = CartItem
-        fields = ['id', 'product_variant', 'product_name', 'price', 'quantity']
+        fields = ["id", "product_variant", "product_name", "price", "quantity"]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -16,7 +18,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'items']
+        fields = ["id", "user", "items"]
 
 
 class CartItemUpdateSerializer(serializers.Serializer):

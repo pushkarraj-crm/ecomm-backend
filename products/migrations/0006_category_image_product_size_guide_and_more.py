@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('products', '0005_deliveryarea_productvariant_original_price_and_more'),
+        ("products", "0005_deliveryarea_productvariant_original_price_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='category',
-            name='image',
-            field=models.ImageField(blank=True, upload_to='categories/'),
+            model_name="category",
+            name="image",
+            field=models.ImageField(blank=True, upload_to="categories/"),
         ),
         migrations.AddField(
-            model_name='product',
-            name='size_guide',
+            model_name="product",
+            name="size_guide",
             field=models.TextField(blank=True, max_length=4000),
         ),
         migrations.AddField(
-            model_name='product',
-            name='specifications',
+            model_name="product",
+            name="specifications",
             field=models.JSONField(blank=True, default=dict),
         ),
     ]

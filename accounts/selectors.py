@@ -14,4 +14,4 @@ def get_active_user_by_id(user_id):
 
 
 def get_approved_sellers():
-    return User.objects.filter(is_seller=True, seller_status='approved')
+    return User.objects.filter(is_seller=True, seller_status="approved")

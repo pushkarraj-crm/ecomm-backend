@@ -8,8 +8,8 @@ class CartItemInline(admin.TabularInline):
 
 
 class CartAdmin(admin.ModelAdmin):
-    exclude = ['user']
-    list_display = ['id', 'user']
+    exclude = ["user"]
+    list_display = ["id", "user"]
     inlines = [CartItemInline]
 
     def save_model(self, request, obj, form, change):

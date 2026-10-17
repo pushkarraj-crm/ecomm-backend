@@ -42,55 +42,57 @@ class RazorpayWebhookAPIView(APIView):
 
     def post(self, request):
         secret = settings.RAZORPAY_WEBHOOK_SECRET
-        signature = request.headers.get('X-Razorpay-Signature', '')
+        signature = request.headers.get("X-Razorpay-Signature", "")
         if not secret:
-            return Response({'error': 'Razorpay webhook secret is not configured.'}, status=503)
+            return Response(
+                {"error": "Razorpay webhook secret is not configured."}, status=503
+            )
 
         expected = hmac.new(
-            secret.encode('utf-8'),
+            secret.encode("utf-8"),
             request.body,
             hashlib.sha256,
         ).hexdigest()
         if not signature or not hmac.compare_digest(expected, signature):
-            return Response({'error': 'Invalid webhook signature.'}, status=400)
+            return Response({"error": "Invalid webhook signature."}, status=400)
 
         try:
-            event_data = json.loads(request.body.decode('utf-8'))
+            event_data = json.loads(request.body.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
-            return Response({'error': 'Invalid webhook payload.'}, status=400)
+            return Response({"error": "Invalid webhook payload."}, status=400)
 
         if not isinstance(event_data, dict):
-            return Response({'error': 'Invalid webhook payload.'}, status=400)
+            return Response({"error": "Invalid webhook payload."}, status=400)
 
-        event = event_data.get('event')
-        payload = event_data.get('payload') or {}
+        event = event_data.get("event")
+        payload = event_data.get("payload") or {}
         if not isinstance(payload, dict):
-            return Response({'error': 'Invalid webhook payload.'}, status=400)
-        refund_container = payload.get('refund') or {}
+            return Response({"error": "Invalid webhook payload."}, status=400)
+        refund_container = payload.get("refund") or {}
         if not isinstance(refund_container, dict):
-            return Response({'error': 'Invalid webhook payload.'}, status=400)
-        refund_entity = refund_container.get('entity') or {}
+            return Response({"error": "Invalid webhook payload."}, status=400)
+        refund_entity = refund_container.get("entity") or {}
         if not isinstance(refund_entity, dict):
-            return Response({'error': 'Invalid webhook payload.'}, status=400)
-        refund_error = refund_entity.get('error') or {}
+            return Response({"error": "Invalid webhook payload."}, status=400)
+        refund_error = refund_entity.get("error") or {}
         if not isinstance(refund_error, dict):
             refund_error = {}
         status_by_event = {
-            'refund.created': 'pending',
-            'refund.processed': 'processed',
-            'refund.failed': 'failed',
+            "refund.created": "pending",
+            "refund.processed": "processed",
+            "refund.failed": "failed",
         }
-        if event in status_by_event and refund_entity.get('id'):
+        if event in status_by_event and refund_entity.get("id"):
             update_refund_status_by_gateway_id(
-                razorpay_refund_id=refund_entity['id'],
+                razorpay_refund_id=refund_entity["id"],
                 status=status_by_event[event],
                 failure_reason=(
-                    refund_entity.get('error_description')
-                    or refund_error.get('description')
-                    or ''
+                    refund_entity.get("error_description")
+                    or refund_error.get("description")
+                    or ""
                 ),
             )
-        return Response({'received': True})
+        return Response({"received": True})
 
 
 # =========================
@@ -108,21 +110,24 @@ class CheckoutView(APIView):
                 serializer.validated_data,
             )
         except RazorpayGatewayError as error:
-            return Response({'error': str(error)}, status=error.status_code)
+            return Response({"error": str(error)}, status=error.status_code)
 
-        return Response({
-            "message": "Payment initiated",
-            "order_id": order.id,
-            "order_status": order.status,
-            "total": order.total_amount,
-            "payment": {
-                'provider': 'razorpay',
-                'key_id': settings.RAZORPAY_KEY_ID,
-                'razorpay_order_id': payment.razorpay_order_id,
-                'amount': payment.amount_paise,
-                'currency': payment.currency,
+        return Response(
+            {
+                "message": "Payment initiated",
+                "order_id": order.id,
+                "order_status": order.status,
+                "total": order.total_amount,
+                "payment": {
+                    "provider": "razorpay",
+                    "key_id": settings.RAZORPAY_KEY_ID,
+                    "razorpay_order_id": payment.razorpay_order_id,
+                    "amount": payment.amount_paise,
+                    "currency": payment.currency,
+                },
             },
-        }, status=status.HTTP_201_CREATED)
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class VerifyPaymentView(APIView):
@@ -133,7 +138,7 @@ class VerifyPaymentView(APIView):
         serializer.is_valid(raise_exception=True)
         payment = get_customer_payment(
             customer=request.user,
-            order_id=serializer.validated_data['order_id'],
+            order_id=serializer.validated_data["order_id"],
         )
         if payment is None:
             raise Http404
@@ -141,19 +146,21 @@ class VerifyPaymentView(APIView):
         try:
             order = verify_razorpay_payment(
                 payment=payment,
-                razorpay_order_id=serializer.validated_data['razorpay_order_id'],
-                razorpay_payment_id=serializer.validated_data['razorpay_payment_id'],
-                signature=serializer.validated_data['razorpay_signature'],
+                razorpay_order_id=serializer.validated_data["razorpay_order_id"],
+                razorpay_payment_id=serializer.validated_data["razorpay_payment_id"],
+                signature=serializer.validated_data["razorpay_signature"],
             )
         except (PaymentVerificationError, RazorpayGatewayError) as error:
-            return Response({'error': str(error)}, status=error.status_code)
+            return Response({"error": str(error)}, status=error.status_code)
 
-        return Response({
-            'message': 'Payment verified and order confirmed.',
-            'order_id': order.id,
-            'order_status': order.status,
-            'payment_status': 'paid',
-        })
+        return Response(
+            {
+                "message": "Payment verified and order confirmed.",
+                "order_id": order.id,
+                "order_status": order.status,
+                "payment_status": "paid",
+            }
+        )
 
 
 # =========================
@@ -166,10 +173,10 @@ class SellerDashboardAPIView(APIView):
         user = request.user
         orders = get_seller_orders(user)
         counts = orders.aggregate(
-            total=Count('id'),
-            pending=Count('id', filter=Q(status='pending')),
-            shipped=Count('id', filter=Q(status='shipped')),
-            delivered=Count('id', filter=Q(status='delivered')),
+            total=Count("id"),
+            pending=Count("id", filter=Q(status="pending")),
+            shipped=Count("id", filter=Q(status="shipped")),
+            delivered=Count("id", filter=Q(status="delivered")),
         )
 
         # Keep the dashboard response light; the dedicated orders endpoint is
@@ -181,23 +188,25 @@ class SellerDashboardAPIView(APIView):
             low_stock_threshold=settings.LOW_STOCK_THRESHOLD,
         )
 
-        return Response({
-            "seller": user.email,
-            "total_orders": counts['total'],
-            "pending_orders": counts['pending'],
-            "shipped_orders": counts['shipped'],
-            "delivered_orders": counts['delivered'],
-            "inventory": {
-                'low_stock_threshold': settings.LOW_STOCK_THRESHOLD,
-                **inventory,
-            },
-            "earnings": {
-                key: (float(value) if key != 'paid_order_count' else value)
-                for key, value in earnings.items()
-            },
-            "orders": serializer.data,
-            "recent_orders_limit": 10,
-        })
+        return Response(
+            {
+                "seller": user.email,
+                "total_orders": counts["total"],
+                "pending_orders": counts["pending"],
+                "shipped_orders": counts["shipped"],
+                "delivered_orders": counts["delivered"],
+                "inventory": {
+                    "low_stock_threshold": settings.LOW_STOCK_THRESHOLD,
+                    **inventory,
+                },
+                "earnings": {
+                    key: (float(value) if key != "paid_order_count" else value)
+                    for key, value in earnings.items()
+                },
+                "orders": serializer.data,
+                "recent_orders_limit": 10,
+            }
+        )
 
 
 # =========================
@@ -213,13 +222,16 @@ class OrderStatusUpdateAPIView(APIView):
 
         serializer = OrderStatusUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        order = update_seller_order_status(order, serializer.validated_data['status'])
+        order = update_seller_order_status(order, serializer.validated_data["status"])
 
-        return Response({
-            "message": "Order status updated",
-            "order_id": order.id,
-            "new_status": order.status
-        })
+        return Response(
+            {
+                "message": "Order status updated",
+                "order_id": order.id,
+                "new_status": order.status,
+            }
+        )
+
 
 class CustomerOrderHistoryAPIView(APIView):
     permission_classes = [IsAuthenticated, IsCustomer]
@@ -231,13 +243,15 @@ class CustomerOrderHistoryAPIView(APIView):
         page = paginator.paginate_queryset(orders, request, view=self)
         serializer = OrderSerializer(page, many=True)
 
-        return Response({
-            "customer": user.email,
-            "total_orders": paginator.page.paginator.count,
-            "orders": serializer.data,
-            "next": paginator.get_next_link(),
-            "previous": paginator.get_previous_link(),
-        })
+        return Response(
+            {
+                "customer": user.email,
+                "total_orders": paginator.page.paginator.count,
+                "orders": serializer.data,
+                "next": paginator.get_next_link(),
+                "previous": paginator.get_previous_link(),
+            }
+        )
 
 
 class ShipmentTrackingView(APIView):
@@ -245,15 +259,19 @@ class ShipmentTrackingView(APIView):
 
     def patch(self, request, pk):
         from rest_framework import serializers
+
         class TrackingSerializer(serializers.Serializer):
             carrier = serializers.CharField(max_length=100, allow_blank=True)
             tracking_number = serializers.CharField(max_length=150, allow_blank=True)
             tracking_url = serializers.URLField(allow_blank=True)
 
             def validate_tracking_url(self, value):
-                if value and not value.startswith('https://'):
-                    raise serializers.ValidationError('Use an HTTPS carrier tracking link.')
+                if value and not value.startswith("https://"):
+                    raise serializers.ValidationError(
+                        "Use an HTTPS carrier tracking link."
+                    )
                 return value
+
         order = get_seller_order(request.user, pk)
         if order is None:
             raise Http404
@@ -274,30 +292,69 @@ class CustomerOrderRequestView(APIView):
         from datetime import timedelta
         from .models import SellerOrder, CustomerOrderRequest
         from rest_framework.exceptions import ValidationError
+
         with transaction.atomic():
-            order = SellerOrder.objects.select_for_update().filter(pk=pk, order__user=request.user).select_related('order').first()
+            order = (
+                SellerOrder.objects.select_for_update()
+                .filter(pk=pk, order__user=request.user)
+                .select_related("order")
+                .first()
+            )
             if order is None:
                 raise Http404
-            kind = request.data.get('kind')
-            reason = request.data.get('reason', '')
-            if kind not in ('cancel', 'return', 'refund') or not isinstance(reason, str) or not 10 <= len(reason.strip()) <= 2000:
-                raise ValidationError('Choose cancel, return or refund and provide a reason of 10–2000 characters.')
-            if order.order.status not in ('paid', 'partially_refunded'):
-                raise ValidationError('Requests require a paid order.')
-            if kind == 'cancel' and order.status != 'pending':
-                raise ValidationError('Cancellation can only be requested before dispatch.')
-            if kind == 'return':
-                if order.status != 'delivered' or not order.delivered_at:
-                    raise ValidationError('Returns require a recorded delivery date.')
-                items = list(order.items.select_related('product_variant__product'))
+            kind = request.data.get("kind")
+            reason = request.data.get("reason", "")
+            if (
+                kind not in ("cancel", "return", "refund")
+                or not isinstance(reason, str)
+                or not 10 <= len(reason.strip()) <= 2000
+            ):
+                raise ValidationError(
+                    "Choose cancel, return or refund and provide a reason of 10–2000 characters."
+                )
+            if order.order.status not in ("paid", "partially_refunded"):
+                raise ValidationError("Requests require a paid order.")
+            if kind == "cancel" and order.status != "pending":
+                raise ValidationError(
+                    "Cancellation can only be requested before dispatch."
+                )
+            if kind == "return":
+                if order.status != "delivered" or not order.delivered_at:
+                    raise ValidationError("Returns require a recorded delivery date.")
+                items = list(order.items.select_related("product_variant__product"))
+
                 def eligible(item):
-                    policy = item.return_policy if item.return_policy is not None else item.product_variant.product.return_policy
-                    days = item.return_days if item.return_policy is not None else item.product_variant.product.return_days
-                    return policy == 'return_and_exchange' and days and timezone.now() <= order.delivered_at + timedelta(days=days)
+                    policy = (
+                        item.return_policy
+                        if item.return_policy is not None
+                        else item.product_variant.product.return_policy
+                    )
+                    days = (
+                        item.return_days
+                        if item.return_policy is not None
+                        else item.product_variant.product.return_days
+                    )
+                    return (
+                        policy == "return_and_exchange"
+                        and days
+                        and timezone.now() <= order.delivered_at + timedelta(days=days)
+                    )
+
                 if not items or not all(eligible(item) for item in items):
-                    raise ValidationError('This shipment is outside its return eligibility. Contact support for help.')
-            obj, created = CustomerOrderRequest.objects.get_or_create(seller_order=order, kind=kind, defaults={'reason': reason.strip()})
-        return Response({'id': obj.id, 'status': obj.status, 'message': 'Request received for review. This does not automatically cancel the order or refund payment.'}, status=201 if created else 200)
+                    raise ValidationError(
+                        "This shipment is outside its return eligibility. Contact support for help."
+                    )
+            obj, created = CustomerOrderRequest.objects.get_or_create(
+                seller_order=order, kind=kind, defaults={"reason": reason.strip()}
+            )
+        return Response(
+            {
+                "id": obj.id,
+                "status": obj.status,
+                "message": "Request received for review. This does not automatically cancel the order or refund payment.",
+            },
+            status=201 if created else 200,
+        )
 
 
 class CouponPreviewView(APIView):
@@ -307,12 +364,23 @@ class CouponPreviewView(APIView):
         from .promotions import price_cart
         from cart.selectors import get_cart_for_user
         from rest_framework.exceptions import ValidationError
-        code = request.data.get('coupon_code', '')
+
+        code = request.data.get("coupon_code", "")
         if not isinstance(code, str) or len(code) > 40:
-            raise ValidationError({'coupon_code': 'Enter a coupon code of at most 40 characters.'})
+            raise ValidationError(
+                {"coupon_code": "Enter a coupon code of at most 40 characters."}
+            )
         cart = get_cart_for_user(request.user)
         if not cart or not cart.items.exists():
-            raise ValidationError({'cart': 'Your cart is empty.'})
-        result = price_cart(list(cart.items.select_related('product_variant__product')), code)
-        return Response({'coupon_code': result['coupon_code'], 'subtotal': result['subtotal_paise']/100,
-                         'total': result['total_paise']/100, 'discount': result['discount_paise']/100})
+            raise ValidationError({"cart": "Your cart is empty."})
+        result = price_cart(
+            list(cart.items.select_related("product_variant__product")), code
+        )
+        return Response(
+            {
+                "coupon_code": result["coupon_code"],
+                "subtotal": result["subtotal_paise"] / 100,
+                "total": result["total_paise"] / 100,
+                "discount": result["discount_paise"] / 100,
+            }
+        )

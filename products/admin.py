@@ -23,7 +23,7 @@ class ProductVariantInline(admin.TabularInline):
 # PRODUCT ADMIN
 # =========================
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'seller', 'status', 'created_at']
+    list_display = ["id", "name", "seller", "status", "created_at"]
     inlines = [ProductVariantInline]
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -41,7 +41,7 @@ class ProductAdmin(admin.ModelAdmin):
 # VARIANT ADMIN
 # =========================
 class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ['id', 'product', 'size', 'color', 'price', 'stock']
+    list_display = ["id", "product", "size", "color", "price", "stock"]
     inlines = [ProductImageInline]
 
 
@@ -49,9 +49,9 @@ class ProductVariantAdmin(admin.ModelAdmin):
 # CATEGORY ADMIN
 # =========================
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'parent']
-    list_filter = ['parent']
-    search_fields = ['name']
+    list_display = ["id", "name", "parent"]
+    list_filter = ["parent"]
+    search_fields = ["name"]
 
 
 # =========================
@@ -65,12 +65,14 @@ admin.site.register(Review)
 
 from .models import StoreBanner, DeliveryArea
 
+
 @admin.register(StoreBanner)
 class StoreBannerAdmin(admin.ModelAdmin):
-    list_display = ['title', 'category', 'is_active', 'position']
-    list_editable = ['is_active', 'position']
+    list_display = ["title", "category", "is_active", "position"]
+    list_editable = ["is_active", "position"]
+
 
 @admin.register(DeliveryArea)
 class DeliveryAreaAdmin(admin.ModelAdmin):
-    list_display = ['postal_code', 'city', 'min_days', 'max_days', 'is_active']
-    search_fields = ['postal_code', 'city']
+    list_display = ["postal_code", "city", "min_days", "max_days", "is_active"]
+    search_fields = ["postal_code", "city"]
