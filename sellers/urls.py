@@ -1,3 +1,4 @@
+from .order_workspace import SellerOrderWorkspaceView, SellerOrderWorkspaceDetailView
 from django.urls import path
 from .catalog_submit import SellerCatalogSubmitView
 from .image_checks import SellerImageCheckView
@@ -33,6 +34,8 @@ from .catalog import (
 )
 
 urlpatterns = [
+    path("orders/workspace/", SellerOrderWorkspaceView.as_view()),
+    path("orders/<int:pk>/details/", SellerOrderWorkspaceDetailView.as_view()),
     path("orders/<int:pk>/tracking/", ShipmentTrackingView.as_view()),
     path("catalog/", SellerCatalogAPIView.as_view()),
     path("catalog/submit/", SellerCatalogSubmitView.as_view()),
